@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DKTR N9NE — SZN 1 Roadmap</title>
+  <style>
+    :root {
+      --bg: #050711;
+      --card: rgba(8, 12, 26, 0.96);
+      --border: rgba(0, 229, 255, 0.25);
+      --accent: #00e5ff;
+      --text-soft: rgba(214, 242, 255, 0.9);
+      --cameo: #ffb84d;
+      --live: #ff4f8f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      background: radial-gradient(circle at top, #141b32 0%, #05060a 52%, #020308 100%);
+      color: #f5fbff;
+    }
+    .shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 18px 60px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,229,255,0.4);
+      background: rgba(3, 12, 20, 0.96);
+      color: var(--text-soft);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+    }
+    header p {
+      margin: 0;
+      color: var(--text-soft);
+      max-width: 560px;
+      margin-inline: auto;
+      font-size: 0.95rem;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 18px 0 20px;
+      flex-wrap: wrap;
+    }
+    .nav-pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,229,255,0.35);
+      background: rgba(5, 14, 25, 0.96);
+      font-size: 0.8rem;
+      color: var(--text-soft);
+    }
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 4px;
+    }
+    .legend-cameo { background: var(--cameo); }
+    .legend-live { background: var(--live); }
+
+    .episodes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .episode-card {
+      border-radius: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.85);
+      padding: 14px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .ep-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .ep-title {
+      font-size: 0.95rem;
+      margin: 0;
+    }
+    .ep-number {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-soft);
+    }
+    .ep-tag {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,229,255,0.35);
+      background: rgba(2, 14, 22, 0.96);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ep-body {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+    }
+    .ep-links {
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .ep-link {
+      font-size: 0.8rem;
+      text-decoration: none;
+      color: var(--accent);
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,229,255,0.35);
+      background: rgba(2, 14, 22, 0.96);
+    }
+    .ep-foot {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .ep-foot strong { color: #e0f6ff; }
+  </style>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    const episodes = [
+      {
+        number: 'EP01',
+        title: 'Passport Girl — Origin Files',
+        role: 'Full DKTR N9NE narrative',
+        tag: 'Lore / Origin',
+        description: 'Deep dive into Passport Girl and the early Tumblr era. How past internet lives shaped DKTR N9NE and the N9NEVERSE aesthetic.',
+        links: [
+          { label: 'Passport Girl (FB)', href: 'https://www.facebook.com/share/v/1AZDAY8neg/?mibextid=wwXIfr' },
+          { label: 'Tumblr Archive', href: 'https://dazednconfuzed.tumblr.com' },
+        ],
+        xpHook: 'Comment your wildest old internet alter ego. Selected entries read on stream for XP/CRED.',
+      },
+      {
+        number: 'EP02',
+        title: 'No Gold Anything — Cameo Hunt',
+        role: 'Cameo only',
+        tag: 'Cameo Challenge',
+        description: 'You appear, but it is not a DKTR N9NE piece. Fans hunt for the cameo and timestamp it to earn XP.',
+        links: [
+          { label: 'No Gold Anything (YouTube)', href: 'https://youtu.be/cUFP2POUFG0?si=3FM4xRW8BRTYAX6Q' },
+        ],
+        xpHook: 'Find the DKTR N9NE cameo and submit the timestamp (e.g., 01:23) via the portal/Discord to earn XP. First correct entries get bonus CRED.',
+        cameo: true,
+      },
+      {
+        number: 'EP03',
+        title: 'Elbow TV — Mayweather vs Tebow',
+        role: 'Full DKTR N9NE narrative',
+        tag: 'Comedy / Commentary',
+        description: 'You react to the Elbow TV clip and talk about comedy, media, and how this type of content fits into the N9NEVERSE next to the music.',
+        links: [
+          { label: 'Elbow TV: Mayweather vs Tebow', href: 'https://youtu.be/yjp3253WjmQ?si=MiBFjQp8AoQtiDsW' },
+        ],
+        xpHook: 'Fans pitch absurd matchups in comments; best ones get turned into mini bits on stream for XP.',
+      },
+      {
+        number: 'EP04',
+        title: 'Dream Girl ft Mr Thomas',
+        role: 'Full DKTR N9NE narrative',
+        tag: 'Music / Duality',
+        description: 'Breakdown of Dream Girl, the Maurice Thomas vs DKTR N9NE duality, and how romance lives inside the N9NEVERSE.',
+        links: [
+          { label: 'Dream Girl ft Mr Thomas', href: 'https://youtu.be/go-mLHuspuc?si=3u1fIPlztJaKSdbN' },
+        ],
+        xpHook: 'Fans drop “dream person” tropes; best ones become Haiku or future lyrics with XP rewards.',
+      },
+      {
+        number: 'EP05',
+        title: 'Chief Keef / 50 / Young Chop — Cameo Hunt',
+        role: 'Cameo only',
+        tag: 'Cameo Challenge',
+        description: 'Era document where you only cameo. Fans must spot and timestamp you inside the Chief Keef / 50 / Young Chop video to earn XP.',
+        links: [
+          { label: 'Chief Keef / 50 / Young Chop clip', href: 'https://youtu.be/YMoSbh7AK8U?si=uNvxh1_L8QAAxZ0d' },
+        ],
+        xpHook: 'Submit exact timestamp + what you are doing in the frame for bonus XP and possible CRED.',
+        cameo: true,
+      },
+      {
+        number: 'EP06',
+        title: 'Old Thing Back',
+        role: 'Full DKTR N9NE narrative',
+        tag: 'Nostalgia / Return',
+        description: 'Using Old Thing Back to talk about relationship nostalgia and trying to bring back old versions of yourself, people, and platforms.',
+        links: [
+          { label: 'Old Thing Back', href: 'https://youtu.be/cZmULgDLi8g?si=YrTuVP590ZOi9DRf' },
+        ],
+        xpHook: 'Fans vote on which “old thing” (song, video, blog post) should be restored or remastered in SZN 2 for XP.',
+      },
+      {
+        number: 'EP07',
+        title: 'Scared of The D',
+        role: 'Full DKTR N9NE narrative',
+        tag: 'Place / Fear',
+        description: 'Scared of The D as a lens on cities, fear, respect, and how geography myths live inside your stories.',
+        links: [
+          { label: 'Scared of The D', href: 'https://youtu.be/6ekFvpry5SY?si=Du64DOgUl49SeGq5' },
+        ],
+        xpHook: 'Fans share the city they are lowkey scared of and why; best responses get read on stream for XP.',
+      },
+      {
+        number: 'EP08',
+        title: 'Russell & Sound in Color',
+        role: 'Full DKTR N9NE narrative',
+        tag: 'Craft / Aesthetic Thesis',
+        description: 'Russell and Sound in Color as the thesis statement for what DKTR N9NE actually sounds and looks like. Tying the whole season together.',
+        links: [
+          { label: 'Russell', href: 'https://youtu.be/ljofa1n-Hf0?si=gpyVnKswzAUNvrYo' },
+          { label: 'Sound in Color', href: 'https://youtu.be/SVjEUTiOvYs?si=6aBiyOBhXqA8GAu9' },
+        ],
+        xpHook: 'Fans describe your sound in one color + one object; best become canon lore and earn XP.',
+      },
+    ];
+
+    function EpisodeCard({ ep }) {
+      return (
+        React.createElement('article', { className: 'episode-card' },
+          React.createElement('div', { className: 'ep-header' },
+            React.createElement('div', null,
+              React.createElement('div', { className: 'ep-number' }, ep.number),
+              React.createElement('h2', { className: 'ep-title' }, ep.title),
+            ),
+            React.createElement('span', { className: 'ep-tag' },
+              ep.cameo && React.createElement('span', { className: 'legend-dot legend-cameo' }),
+              !ep.cameo && React.createElement('span', { className: 'legend-dot legend-live' }),
+              ep.tag
+            )
+          ),
+          React.createElement('div', { className: 'ep-body' }, ep.description),
+          React.createElement('div', { className: 'ep-links' },
+            ep.links.map((link, idx) => (
+              React.createElement('a', {
+                key: idx,
+                className: 'ep-link',
+                href: link.href,
+                target: '_blank',
+                rel: 'noopener noreferrer'
+              }, link.label)
+            ))
+          ),
+          React.createElement('div', { className: 'ep-foot' },
+            React.createElement('span', null, React.createElement('strong', null, 'Role: '), ep.role),
+            React.createElement('span', null, React.createElement('strong', null, 'XP Hook: '), ep.xpHook)
+          )
+        )
+      );
+    }
+
+    function App() {
+      return (
+        React.createElement('div', { className: 'shell' },
+          React.createElement('header', null,
+            React.createElement('div', { className: 'pill' }, 'SZN 1 — Content Roadmap'),
+            React.createElement('h1', null, 'Passport to the N9NEVERSE'),
+            React.createElement('p', null, 'Season 1 is an 8-episode arc built from existing artifacts, cameos, and music. Fans move from watching to playing by hunting cameos, responding to prompts, and earning XP in the Prestige Ladder.')
+          ),
+          React.createElement('nav', null,
+            React.createElement('span', { className: 'nav-pill' },
+              React.createElement('span', { className: 'legend-dot legend-live' }),
+              'Full DKTR N9NE narrative episodes'
+            ),
+            React.createElement('span', { className: 'nav-pill' },
+              React.createElement('span', { className: 'legend-dot legend-cameo' }),
+              'Cameo-only episodes — find & timestamp to earn XP'
+            )
+          ),
+          React.createElement('section', { className: 'episodes' },
+            episodes.map(ep => React.createElement(EpisodeCard, { key: ep.number, ep }))
+          )
+        )
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(App));
+  </script>
+</body>
+</html>
