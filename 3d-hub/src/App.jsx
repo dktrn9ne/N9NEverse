@@ -331,12 +331,17 @@ function JourneyScene({ tRef, onActiveEpisodeChange }) {
     return () => mql?.removeEventListener?.('change', update)
   }, [])
 
+  const lastActiveRef = useRef(-999)
+
   useFrame(({ camera, clock }, delta) => {
     const currentT = tRef.current
     const stopIdx = nearestIndex(stops, currentT)
     const activeEpisodeIndex = stopIdx - 1
 
-    if (onActiveEpisodeChange) onActiveEpisodeChange(activeEpisodeIndex)
+    if (onActiveEpisodeChange && lastActiveRef.current !== activeEpisodeIndex) {
+      lastActiveRef.current = activeEpisodeIndex
+      onActiveEpisodeChange(activeEpisodeIndex)
+    }
 
     // Determine segment (between stops) to interpolate camera
     let aIdx = 0
@@ -393,9 +398,8 @@ function JourneyScene({ tRef, onActiveEpisodeChange }) {
         const activeEpisodeIndex = stopIdx - 1
         const isActive = activeEpisodeIndex === i
 
-        // active weight based on distance to this episode stop
-        const w = 1 - clamp(Math.abs(tRef.current - stops[i + 1]) / 0.12, 0, 1)
-        const activeWeight = THREE.MathUtils.smoothstep(w, 0, 1)
+        // NOTE: keep this simple (no per-frame React state churn). We'll refine later.
+        const activeWeight = isActive ? 1 : 0
 
         return (
           <EpisodeObject
