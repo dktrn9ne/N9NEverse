@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DKTR N9NE — Prestige Ladder</title>
+  <style>
+    :root {
+      --bg: #050711;
+      --card: rgba(8, 12, 26, 0.96);
+      --border: rgba(0, 229, 255, 0.25);
+      --accent: #00e5ff;
+      --text-soft: rgba(214, 242, 255, 0.9);
+      --bronze: #b87333;
+      --silver: #c0c0c0;
+      --gold: #ffd700;
+      --platinum: #e5f2ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      background: radial-gradient(circle at top, #141b32 0%, #05060a 52%, #020308 100%);
+      color: #f5fbff;
+    }
+    .shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 18px 60px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 3vw, 2.6rem);
+    }
+    header p {
+      margin: 0;
+      color: var(--text-soft);
+      max-width: 540px;
+      margin-inline: auto;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,229,255,0.4);
+      background: rgba(3, 12, 20, 0.96);
+      color: var(--text-soft);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr);
+      gap: 18px;
+      align-items: flex-start;
+    }
+    .ladder-column {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .tier-card {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.85);
+      position: relative;
+    }
+    .tier-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      opacity: 0.9;
+    }
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+    }
+    .dot.free { background: var(--accent); }
+    .dot.bronze { background: var(--bronze); }
+    .dot.silver { background: var(--silver); }
+    .dot.gold { background: var(--gold); }
+    .dot.platinum { background: var(--platinum); }
+    .tier-name {
+      margin: 4px 0 2px;
+      font-size: 1rem;
+    }
+    .tier-identity {
+      margin: 0 0 6px;
+      font-size: 0.9rem;
+      color: var(--text-soft);
+    }
+    .subline {
+      font-size: 0.82rem;
+      color: var(--text-soft);
+      margin-bottom: 6px;
+    }
+    .list {
+      margin: 6px 0 6px;
+      padding-left: 16px;
+      font-size: 0.85rem;
+      color: var(--text-soft);
+    }
+    .list li { margin-bottom: 2px; }
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+    }
+    .meta-pill {
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,229,255,0.35);
+      background: rgba(2,14,22,0.9);
+    }
+    .ladder-line {
+      position: absolute;
+      right: -18px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, rgba(0,229,255,0.5), rgba(0,229,255,0));
+      opacity: 0.6;
+    }
+    .tier-card:first-child .ladder-line { border-radius: 0 0 999px 999px; }
+    .tier-card:last-child .ladder-line { border-radius: 999px 999px 0 0; }
+
+    .rose-card {
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: radial-gradient(circle at top left, rgba(255,110,168,0.25), rgba(5,8,16,0.98));
+      border: 1px solid rgba(255,110,168,0.6);
+      box-shadow: 0 22px 50px rgba(0,0,0,0.9);
+    }
+    .rose-title {
+      font-size: 1.1rem;
+      margin: 0 0 4px;
+    }
+    .rose-price {
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      margin-bottom: 8px;
+    }
+    .rose-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--text-soft);
+    }
+    .rose-columns h4 { margin: 0 0 4px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; }
+    .rose-columns ul { margin: 0; padding-left: 16px; }
+    .rose-tagline {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: var(--text-soft);
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      .ladder-line { display: none; }
+    }
+  </style>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/javascript">
+    const tiers = [
+      {
+        level: 1,
+        name: 'The NEIN\'s',
+        price: 'Free',
+        tag: 'Signal Receivers',
+        identity: 'The Signal Receivers',
+        unlock: 'Open access',
+        gets: [
+          'Access to public scavenger hunt',
+          'XP accumulation',
+          'Progress bar visibility',
+          'Monthly "Archive Briefing"',
+          'Eligibility to unlock paid tiers',
+        ],
+        psychology: 'Aspirational, not basic. They can see locked checkpoints, hidden content, rose gold silhouette. Inside but not elevated.',
+        xp: 'Base XP',
+        dotClass: 'free',
+      },
+      {
+        level: 2,
+        name: 'The Haiku Society',
+        price: '$10 / Bronze',
+        tag: 'Observers Who Speak',
+        identity: 'The Observers Who Speak',
+        unlock: 'Minimum XP + 2-week engagement streak',
+        gets: [
+          'Early access to drops',
+          'Private Discord rooms',
+          'Archive Clearance Level 1',
+          'Exclusive Haiku prompts',
+          'XP multiplier (1.25x)',
+        ],
+        psychology: 'Stability layer. 100–150 core → $1k–$1.5k monthly. Must feel intimate, not transactional.',
+        xp: '1.25x XP',
+        target: '100–150 members',
+        dotClass: 'bronze',
+      },
+      {
+        level: 3,
+        name: 'The Kaizen Clan',
+        price: '$20 / Silver',
+        tag: 'Builders',
+        identity: 'The Builders',
+        unlock: 'Archive completion + contribution proof (clip, referral, lore post)',
+        gets: [
+          'Archive Clearance Level 2',
+          'Merch pre-access',
+          'Vote participation (limited)',
+          'Private monthly stream',
+          '1 CRED eligibility per quarter',
+          'XP multiplier (1.5x)',
+        ],
+        psychology: 'Growth tier. They shape, not just watch.',
+        xp: '1.5x XP',
+        target: '150–300 members → $3k–$6k monthly',
+        dotClass: 'silver',
+      },
+      {
+        level: 4,
+        name: 'Divine Nines',
+        price: '$25 / Gold',
+        tag: 'Inner Circle Operators',
+        identity: 'Inner Circle Operators',
+        unlock: '60+ day consistency, growth impact, community trust score',
+        gets: [
+          'Archive Clearance Level 3',
+          'Limited merch at cost',
+          'Revenue share pool access (small %)',
+          'Tour pre-access',
+          'Influence votes',
+          '2–3 CRED per quarter',
+          'XP multiplier (2x)',
+        ],
+        psychology: 'Participation in upside, not just support.',
+        xp: '2x XP',
+        target: '200–500 members → $5k–$12.5k monthly',
+        dotClass: 'gold',
+      },
+      {
+        level: 5,
+        name: 'OMEGA',
+        price: 'Platinum — Earned Only',
+        tag: 'Architects',
+        identity: 'Architects',
+        unlock: 'Invite only — proven revenue contribution, cultural leadership, loyalty, peer validation',
+        gets: [
+          'Direct strategy calls',
+          'Profit participation pool',
+          'Creative credits',
+          'Early business insight',
+          'Potential equity-like structures (legally careful)',
+          'Limited edition Omega artifact',
+        ],
+        psychology: '25–50 members max. Scarcity maintains gravity.',
+        xp: 'Custom XP / governance',
+        target: '25–50 max',
+        dotClass: 'platinum',
+      },
+    ];
+
+    function TierCard({ tier, showLine }) {
+      return React.createElement(
+        'section',
+        { className: 'tier-card' },
+        showLine && React.createElement('div', { className: 'ladder-line' }),
+        React.createElement(
+          'div',
+          { className: 'tier-label' },
+          React.createElement('span', { className: `dot ${tier.dotClass}` }),
+          React.createElement('span', null, `Level ${tier.level} — ${tier.name}`)
+        ),
+        React.createElement('p', { className: 'tier-identity' }, tier.identity),
+        React.createElement('p', { className: 'subline' }, tier.unlock),
+        React.createElement(
+          'ul',
+          { className: 'list' },
+          tier.gets.map((item, idx) => React.createElement('li', { key: idx }, item))
+        ),
+        React.createElement('p', { className: 'subline' }, tier.psychology),
+        React.createElement(
+          'div',
+          { className: 'meta-row' },
+          tier.price && React.createElement('span', { className: 'meta-pill' }, tier.price),
+          tier.xp && React.createElement('span', { className: 'meta-pill' }, tier.xp),
+          tier.target && React.createElement('span', { className: 'meta-pill' }, tier.target)
+        )
+      );
+    }
+
+    function RoseCard() {
+      return (
+        React.createElement('section', { className: 'rose-card' },
+          React.createElement('div', { className: 'pill' }, 'Legacy Patron Contract'),
+          React.createElement('h2', { className: 'rose-title' }, 'The Rose Gold N9NE Card'),
+          React.createElement('div', { className: 'rose-price' }, '$9,999.99 • Limited to 9 total'),
+          React.createElement('p', null, 'This is not a VIP pass, flex product, or donation tier. It is a high-net-worth patron contract for serious believers.'),
+          React.createElement('div', { className: 'rose-columns' },
+            React.createElement('div', null,
+              React.createElement('h4', null, 'Includes'),
+              React.createElement('ul', null,
+                React.createElement('li', null, 'Lifetime Divine Nines access'),
+                React.createElement('li', null, '2-year Omega seat (not permanent)'),
+                React.createElement('li', null, 'Executive dinner in Austin'),
+                React.createElement('li', null, 'Co-created collectible'),
+                React.createElement('li', null, 'Name etched into Master Archive'),
+                React.createElement('li', null, 'Personal 1-of-1 artifact'),
+                React.createElement('li', null, 'Direct business access window')
+              )
+            ),
+            React.createElement('div', null,
+              React.createElement('h4', null, 'Positioning'),
+              React.createElement('ul', null,
+                React.createElement('li', null, 'Anchor value perception of the ecosystem'),
+                React.createElement('li', null, 'Fund expansion phases without dilution'),
+                React.createElement('li', null, 'Signal seriousness to partners and fans'),
+                React.createElement('li', null, 'Angel-style cultural patrons, not casual fans')
+              )
+            )
+          ),
+          React.createElement('p', { className: 'rose-tagline' },
+            'If executed correctly, you may never sell all 9 — and that is okay. The existence of the card creates gravity.'
+          )
+        )
+      );
+    }
+
+    function App() {
+      return (
+        React.createElement('div', { className: 'shell' },
+          React.createElement('header', null,
+            React.createElement('div', { className: 'pill' }, 'DKTR N9NE — Prestige Ladder'),
+            React.createElement('h1', null, 'The DKTR N9NE Prestige Ladder'),
+            React.createElement('p', null, 'Centered around DKTR N9NE as a cultural order system, not a subscription stack. Each level is a deeper agreement between artist, ecosystem, and believer.')
+          ),
+          React.createElement('div', { className: 'grid' },
+            React.createElement('div', { className: 'ladder-column' },
+              tiers.map((tier, idx) => (
+                React.createElement(TierCard, { key: tier.level, tier: tier, showLine: idx !== tiers.length - 1 })
+              ))
+            ),
+            React.createElement('div', null,
+              React.createElement(RoseCard, null)
+            )
+          )
+        )
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(App));
+  </script>
+</body>
+</html>
