@@ -932,6 +932,19 @@ function App() {
     return () => mql?.removeEventListener?.('change', update)
   }, [])
 
+  // Demand-render safety: nudge a few frames on initial load (iOS Safari sometimes needs it)
+  useEffect(() => {
+    let raf = 0
+    let i = 0
+    const tick = () => {
+      window.__n9_invalidate?.()
+      i++
+      if (i < 20) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
   const awardVisited = (epNumber) => {
     persist({
       ...progress,
@@ -988,10 +1001,20 @@ function App() {
         dpr={[1, 1.15]}
         gl={{ antialias: false, powerPreference: 'high-performance', alpha: false, stencil: false }}
         frameloop="demand"
-        onCreated={({ invalidate }) => {
+        onCreated={({ gl, invalidate }) => {
           setReady(true)
+          // Ensure non-black clear on iOS + force an initial frame
+          try {
+            gl.setClearColor('#020308', 1)
+          } catch {
+            // ignore
+          }
+
           // expose invalidate for scroll/touch handlers
           window.__n9_invalidate = invalidate
+
+          // force first paint (frameloop=demand can otherwise look blank on some browsers)
+          invalidate()
         }}
       >
         <JourneyTicker tRef={tRef} targetRef={targetRef} onMotion={(moving) => setIsMoving(moving)} />
