@@ -161,7 +161,6 @@ function nearestIndex(values, x) {
 // ---- Scene bits ---------------------------------------------------------
 
 function LogoPlane({ billboard = true }) {
-  const texture = useTexture('/n9ne-logo.jpg')
   const ref = useRef()
 
   useFrame(({ camera }) => {
@@ -169,16 +168,15 @@ function LogoPlane({ billboard = true }) {
     ref.current.quaternion.copy(camera.quaternion)
   })
 
+  // Fallback that does NOT depend on external texture loads (important for iOS Safari reliability)
   return (
     <mesh ref={ref}>
-      <planeGeometry args={[2.2, 2.2]} />
+      <circleGeometry args={[1.05, 48]} />
       <meshStandardMaterial
-        map={texture}
-        emissive={'white'}
-        emissiveMap={texture}
-        emissiveIntensity={0.35}
+        color={'#0b1a22'}
+        emissive={'#7be7ff'}
+        emissiveIntensity={0.25}
         toneMapped={false}
-        transparent
       />
     </mesh>
   )
