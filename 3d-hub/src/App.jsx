@@ -187,21 +187,22 @@ function LogoGLB() {
   const texture = useTexture('/pendant-texture.jpg')
   const ref = useRef()
 
-  // Your GLB appears to import laying "flat". We apply a fixed orientation offset
-  // so it sits upright like a pendant, then we billboard around Y to face the user.
-  const BASE_X = -Math.PI / 2
-  const BASE_Y = 0
-  const BASE_Z = 0
+  // Keep the 9 locked in the same *screen position* at all times (HUD-style),
+  // matching the reference framing. This attaches the logo to the camera.
+  const CAM_OFFSET = useMemo(() => new THREE.Vector3(0, -0.25, -2.7), [])
+  const LOGO_EULER = useMemo(() => new THREE.Euler(-0.06, Math.PI, 0.02), [])
+  const qOffset = useMemo(() => new THREE.Quaternion().setFromEuler(LOGO_EULER), [LOGO_EULER])
 
   useFrame(({ camera }) => {
     if (!ref.current) return
 
-    // Face the camera, but only by rotating around Y (keeps it upright).
-    const dx = camera.position.x - ref.current.position.x
-    const dz = camera.position.z - ref.current.position.z
-    const targetY = Math.atan2(dx, dz)
+    // Position a fixed distance in front of the camera, with a slight downward offset
+    const off = CAM_OFFSET.clone().applyQuaternion(camera.quaternion)
+    ref.current.position.copy(camera.position).add(off)
 
-    ref.current.rotation.set(BASE_X, targetY + BASE_Y, BASE_Z)
+    // Match camera orientation, then apply the logo tilt/flip
+    ref.current.quaternion.copy(camera.quaternion)
+    ref.current.quaternion.multiply(qOffset)
   })
 
   // Make it pop a bit regardless of lighting
@@ -270,10 +271,29 @@ function LogoGLB() {
       obj.frustumCulled = false
       obj.castShadow = false
       obj.receiveShadow = false
+
+      // Try to ensure the logo is always visible
+      if (Array.isArray(obj.material)) {
+        obj.material.forEach((m) => {
+          m.depthTest = false
+          m.depthWrite = false
+        })
+      } else {
+        obj.material.depthTest = false
+        obj.material.depthWrite = false
+      }
     })
   }, [scene, texture])
 
-  return <primitive ref={ref} object={scene} position={[0, 0, 0]} scale={1.05} />
+  return (
+    <primitive
+      ref={ref}
+      object={scene}
+      scale={1.05}
+      // render on top so it doesn't get occluded by episode objects
+      renderOrder={10}
+    />
+  )
 }
 
 useGLTF.preload('/9-logo.glb')
