@@ -338,6 +338,8 @@ function EpisodeObject({
   onSelect,
   showTooltip,
   map,
+  passportMats,
+  passportEmbossTex,
 }) {
   const ref = useRef()
 
@@ -357,6 +359,8 @@ function EpisodeObject({
     ? 1.2 + 1.8 * activeWeight
     : 0.6 + 1.4 * activeWeight
 
+  const isPassport = episode.number === 'EP01'
+
   return (
     <mesh
       ref={ref}
@@ -365,17 +369,37 @@ function EpisodeObject({
         e.stopPropagation()
         onSelect()
       }}
+      // For the passport we use multi-materials so only the front face gets the cover.
+      material={isPassport && passportMats ? passportMats : undefined}
     >
-      {geometry}
-      <meshStandardMaterial
-        map={map || null}
-        color={map ? '#ffffff' : baseColor}
-        emissive={emissive}
-        emissiveIntensity={emissiveIntensity}
-        toneMapped={false}
-        roughness={map ? 0.55 : episode.cameo ? 0.25 : 0.4}
-        metalness={map ? 0.05 : episode.cameo ? 0.2 : 0.05}
-      />
+      {isPassport ? <boxGeometry args={[0.26, 0.18, 0.06]} /> : geometry}
+
+      {!isPassport && (
+        <meshStandardMaterial
+          map={map || null}
+          color={map ? '#ffffff' : baseColor}
+          emissive={emissive}
+          emissiveIntensity={emissiveIntensity}
+          toneMapped={false}
+          roughness={map ? 0.55 : episode.cameo ? 0.25 : 0.4}
+          metalness={map ? 0.05 : episode.cameo ? 0.2 : 0.05}
+        />
+      )}
+
+      {isPassport && passportEmbossTex && (
+        <mesh position={[0, 0.07, 0.031]} rotation={[0, 0, 0]}>
+          <planeGeometry args={[0.22, 0.06]} />
+          <meshBasicMaterial
+            map={passportEmbossTex}
+            transparent
+            opacity={0.95}
+            toneMapped={false}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+      )}
+
       {showTooltip && (
         <Html distanceFactor={6}>
           <div className={'tooltip' + (isActive ? ' tooltip--active' : '')}>{episode.short}</div>
@@ -390,10 +414,62 @@ function JourneyScene({ tRef, onActiveEpisodeChange }) {
   const manualOverrideUntilRef = useRef(0)
 
   const passportTex = useTexture('/passport-cover.jpg')
-  useMemo(() => {
+
+  const passportEmbossTex = useMemo(() => {
+    // lightweight gold emboss overlay texture (iOS-safe)
+    const canvas = document.createElement('canvas')
+    canvas.width = 512
+    canvas.height = 128
+    const ctx = canvas.getContext('2d')
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    // subtle gradient gold
+    const grd = ctx.createLinearGradient(0, 0, canvas.width, 0)
+    grd.addColorStop(0, 'rgba(255, 214, 120, 0.15)')
+    grd.addColorStop(0.5, 'rgba(255, 214, 120, 0.95)')
+    grd.addColorStop(1, 'rgba(255, 214, 120, 0.15)')
+
+    ctx.fillStyle = grd
+    ctx.font = '700 72px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.shadowColor = 'rgba(255, 214, 120, 0.55)'
+    ctx.shadowBlur = 18
+    ctx.fillText('PASSPORT', canvas.width / 2, canvas.height / 2 + 2)
+
+    const tex = new THREE.CanvasTexture(canvas)
+    tex.colorSpace = THREE.SRGBColorSpace
+    tex.needsUpdate = true
+    return tex
+  }, [])
+
+  const passportMats = useMemo(() => {
     passportTex.wrapS = passportTex.wrapT = THREE.ClampToEdgeWrapping
     passportTex.colorSpace = THREE.SRGBColorSpace
     passportTex.needsUpdate = true
+
+    // BoxGeometry material order: [right, left, top, bottom, front, back]
+    const leather = new THREE.MeshStandardMaterial({
+      color: '#0b2a55',
+      roughness: 0.85,
+      metalness: 0.02,
+      toneMapped: false,
+    })
+    const front = new THREE.MeshStandardMaterial({
+      map: passportTex,
+      color: '#ffffff',
+      roughness: 0.75,
+      metalness: 0.02,
+      toneMapped: false,
+    })
+    const back = new THREE.MeshStandardMaterial({
+      color: '#071a33',
+      roughness: 0.9,
+      metalness: 0.02,
+      toneMapped: false,
+    })
+
+    return [leather, leather, leather, leather, front, back]
   }, [passportTex])
 
   const stopConfig = useMemo(() => {
@@ -515,7 +591,9 @@ function JourneyScene({ tRef, onActiveEpisodeChange }) {
             position={[pos.x, pos.y, pos.z]}
             isActive={isActive}
             activeWeight={activeWeight}
-            map={i === 0 ? passportTex : null}
+            map={null}
+            passportMats={i === 0 ? passportMats : null}
+            passportEmbossTex={i === 0 ? passportEmbossTex : null}
             onSelect={() => {
               // jump/snap to this stop
               tRef.target = stops[i + 1]
