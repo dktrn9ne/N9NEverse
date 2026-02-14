@@ -186,6 +186,7 @@ function LogoPlane({ billboard = true }) {
 
 function LogoGLB() {
   const { scene } = useGLTF('/9-logo.glb')
+  const texture = useTexture('/pendant-texture.jpg')
   const ref = useRef()
 
   // Your GLB appears to import laying "flat". We apply a fixed orientation offset
@@ -207,18 +208,42 @@ function LogoGLB() {
 
   // Make it pop a bit regardless of lighting
   useEffect(() => {
+    // Basic texture setup
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping
+    texture.repeat.set(1, 1)
+    texture.anisotropy = 4
+    texture.colorSpace = THREE.SRGBColorSpace
+    texture.needsUpdate = true
+
     scene.traverse((obj) => {
       if (!obj.isMesh) return
-      const mat = obj.material
-      if (!mat) return
-      mat.toneMapped = false
-      if ('emissive' in mat) {
-        mat.emissive = new THREE.Color('#7be7ff')
-        mat.emissiveIntensity = 0.45
+
+      // Ensure we can see both sides if the mesh is thin
+      if (obj.material) {
+        const applyToMaterial = (mat) => {
+          if (!mat) return
+          mat.toneMapped = false
+          mat.map = texture
+          mat.metalness = 0.35
+          mat.roughness = 0.28
+          mat.side = THREE.DoubleSide
+
+          // turn off emissive glow for a more "pendant" look
+          if ('emissive' in mat) {
+            mat.emissive = new THREE.Color('#000000')
+            mat.emissiveIntensity = 0
+          }
+          mat.needsUpdate = true
+        }
+
+        if (Array.isArray(obj.material)) obj.material.forEach(applyToMaterial)
+        else applyToMaterial(obj.material)
       }
-      mat.needsUpdate = true
+
+      obj.castShadow = false
+      obj.receiveShadow = false
     })
-  }, [scene])
+  }, [scene, texture])
 
   return <primitive ref={ref} object={scene} position={[0, 0, 0]} scale={1.05} />
 }
