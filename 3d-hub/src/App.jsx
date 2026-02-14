@@ -185,7 +185,7 @@ function LogoPlane({ billboard = true }) {
 }
 
 function LogoGLB() {
-  const { scene } = useGLTF('/n9ne-logo.glb')
+  const { scene } = useGLTF('/9-logo.glb')
   const ref = useRef()
 
   useFrame(({ camera }, delta) => {
@@ -222,7 +222,7 @@ function LogoGLB() {
   )
 }
 
-useGLTF.preload('/n9ne-logo.glb')
+useGLTF.preload('/9-logo.glb')
 
 const geometries = [
   // EP01
