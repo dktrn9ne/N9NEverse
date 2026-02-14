@@ -188,22 +188,24 @@ function LogoGLB() {
   const { scene } = useGLTF('/9-logo.glb')
   const ref = useRef()
 
-  useFrame(({ camera }, delta) => {
+  useFrame(({ camera }) => {
     if (!ref.current) return
-    // gentle spin
-    ref.current.rotation.y += delta * 0.25
-    // keep centered and readable
-    ref.current.quaternion.slerp(camera.quaternion, 0.06)
+
+    // Keep the logo upright (no tilt) and always facing the user.
+    // We only rotate around Y so it stays vertically upright.
+    const dx = camera.position.x - ref.current.position.x
+    const dz = camera.position.z - ref.current.position.z
+    const targetY = Math.atan2(dx, dz)
+    ref.current.rotation.set(0, targetY, 0)
   })
 
   // Make it pop a bit regardless of lighting
-  useMemo(() => {
+  useEffect(() => {
     scene.traverse((obj) => {
       if (!obj.isMesh) return
       const mat = obj.material
       if (!mat) return
       mat.toneMapped = false
-      mat.transparent = Boolean(mat.transparent)
       if ('emissive' in mat) {
         mat.emissive = new THREE.Color('#7be7ff')
         mat.emissiveIntensity = 0.45
@@ -212,14 +214,7 @@ function LogoGLB() {
     })
   }, [scene])
 
-  return (
-    <primitive
-      ref={ref}
-      object={scene}
-      position={[0, 0, 0]}
-      scale={1.6}
-    />
-  )
+  return <primitive ref={ref} object={scene} position={[0, 0, 0]} scale={1.6} />
 }
 
 useGLTF.preload('/9-logo.glb')
