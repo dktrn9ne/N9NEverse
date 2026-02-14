@@ -227,41 +227,43 @@ function LogoGLB() {
       nextMat.toneMapped = false
 
       if (!hasUV) {
-        // iOS-safe triplanar projection (no UVs required)
-        nextMat.map = null
+        // Generate simple planar UVs on the CPU (stable on iOS; no shader hacks).
+        // We project onto the dominant plane based on bounding box extents.
+        const geom = obj.geometry
+        geom.computeBoundingBox()
+        const bb = geom.boundingBox
+        const size = new THREE.Vector3()
+        bb.getSize(size)
 
-        nextMat.onBeforeCompile = (shader) => {
-          shader.uniforms.uTex = { value: texture }
-          shader.uniforms.uScale = { value: 1.6 }
+        const pos = geom.attributes.position
+        const uvs = new Float32Array(pos.count * 2)
 
-          // Vertex: pass world position + world normal to fragment
-          shader.vertexShader = shader.vertexShader
-            .replace(
-              '#include <common>',
-              `#include <common>\n\nvarying vec3 vWPos;\nvarying vec3 vWNorm;`,
-            )
-            .replace(
-              '#include <worldpos_vertex>',
-              `#include <worldpos_vertex>\n\nvWPos = worldPosition.xyz;`,
-            )
-            .replace(
-              '#include <defaultnormal_vertex>',
-              `#include <defaultnormal_vertex>\n\nvWNorm = normalize(mat3(modelMatrix) * normal);`,
-            )
+        // Choose projection plane
+        // If Y is thin (likely a flat pendant), use XZ. Otherwise use XY.
+        const useXZ = size.y < Math.min(size.x, size.z)
 
-          // Fragment: sample texture from 3 axes and blend by normal
-          shader.fragmentShader = shader.fragmentShader
-            .replace(
-              '#include <common>',
-              `#include <common>\n\nuniform sampler2D uTex;\nuniform float uScale;\nvarying vec3 vWPos;\nvarying vec3 vWNorm;\n\nvec4 triSample(vec3 p, vec3 n) {\n  vec3 an = abs(n) + 1e-5;\n  an /= (an.x + an.y + an.z);\n  vec2 uvx = p.zy * uScale;\n  vec2 uvy = p.xz * uScale;\n  vec2 uvz = p.xy * uScale;\n  vec4 tx = texture2D(uTex, uvx);\n  vec4 ty = texture2D(uTex, uvy);\n  vec4 tz = texture2D(uTex, uvz);\n  return tx * an.x + ty * an.y + tz * an.z;\n}`,
-            )
-            .replace(
-              '#include <map_fragment>',
-              `vec4 texelColor = triSample(vWPos, normalize(vWNorm));\n\ndiffuseColor *= texelColor;`,
-            )
+        for (let i = 0; i < pos.count; i++) {
+          const x = pos.getX(i)
+          const y = pos.getY(i)
+          const z = pos.getZ(i)
+
+          let u, v
+          if (useXZ) {
+            u = (x - bb.min.x) / (size.x || 1)
+            v = (z - bb.min.z) / (size.z || 1)
+          } else {
+            u = (x - bb.min.x) / (size.x || 1)
+            v = (y - bb.min.y) / (size.y || 1)
+          }
+
+          uvs[i * 2] = u
+          uvs[i * 2 + 1] = v
         }
 
-        nextMat.customProgramCacheKey = () => 'triplanar-v2'
+        geom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2))
+        geom.attributes.uv.needsUpdate = true
+
+        nextMat.map = texture
       }
 
       obj.material = nextMat
