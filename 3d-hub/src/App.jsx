@@ -227,6 +227,12 @@ function LogoGLB() {
           mat.roughness = 0.18
           mat.side = THREE.DoubleSide
           mat.vertexColors = false
+          mat.transparent = false
+          mat.opacity = 1
+          mat.depthWrite = true
+          mat.depthTest = true
+          mat.alphaTest = 0
+          mat.onBeforeCompile = undefined
 
           // turn off emissive glow for a more "pendant" look
           if ('emissive' in mat) {
@@ -238,21 +244,10 @@ function LogoGLB() {
           if (hasUV) {
             mat.map = texture
           } else {
-            // Fallback when the GLB has no UVs: tri-planar projection (wraps texture without UV unwrap)
-            mat.onBeforeCompile = (shader) => {
-              shader.uniforms.uTex = { value: texture }
-              shader.uniforms.uScale = { value: 1.8 }
-
-              shader.fragmentShader = shader.fragmentShader
-                .replace(
-                  '#include <common>',
-                  `#include <common>\n\nuniform sampler2D uTex;\nuniform float uScale;\n\nvec4 triplanarSample(vec3 pos, vec3 n) {\n  vec3 an = abs(n) + 0.00001;\n  an /= (an.x + an.y + an.z);\n  vec2 uvx = pos.zy * uScale;\n  vec2 uvy = pos.xz * uScale;\n  vec2 uvz = pos.xy * uScale;\n  vec4 tx = texture2D(uTex, uvx);\n  vec4 ty = texture2D(uTex, uvy);\n  vec4 tz = texture2D(uTex, uvz);\n  return tx * an.x + ty * an.y + tz * an.z;\n}`,
-                )
-                .replace(
-                  '#include <map_fragment>',
-                  `#ifdef USE_MAP\n  // ignored\n#else\n  vec4 texelColor = triplanarSample(vViewPosition, normalize(normal));\n  diffuseColor *= texelColor;\n#endif`,
-                )
-            }
+            // If the GLB has no UVs, avoid shader hacks that may break on iOS.
+            // We'll keep it visible and we can re-introduce a proper triplanar shader later.
+            mat.map = null
+            mat.color = new THREE.Color('#ffb6d5')
           }
 
           mat.needsUpdate = true
