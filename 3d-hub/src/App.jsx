@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import {
   OrbitControls,
   Html,
   useTexture,
+  useGLTF,
   Box,
   Torus,
   Cone,
@@ -182,6 +183,46 @@ function LogoPlane({ billboard = true }) {
     </mesh>
   )
 }
+
+function LogoGLB() {
+  const { scene } = useGLTF('/n9ne-logo.glb')
+  const ref = useRef()
+
+  useFrame(({ camera }, delta) => {
+    if (!ref.current) return
+    // gentle spin
+    ref.current.rotation.y += delta * 0.25
+    // keep centered and readable
+    ref.current.quaternion.slerp(camera.quaternion, 0.06)
+  })
+
+  // Make it pop a bit regardless of lighting
+  useMemo(() => {
+    scene.traverse((obj) => {
+      if (!obj.isMesh) return
+      const mat = obj.material
+      if (!mat) return
+      mat.toneMapped = false
+      mat.transparent = Boolean(mat.transparent)
+      if ('emissive' in mat) {
+        mat.emissive = new THREE.Color('#7be7ff')
+        mat.emissiveIntensity = 0.45
+      }
+      mat.needsUpdate = true
+    })
+  }, [scene])
+
+  return (
+    <primitive
+      ref={ref}
+      object={scene}
+      position={[0, 0, 0]}
+      scale={1.6}
+    />
+  )
+}
+
+useGLTF.preload('/n9ne-logo.glb')
 
 const geometries = [
   // EP01
@@ -388,7 +429,9 @@ function JourneyScene({ tRef, onActiveEpisodeChange }) {
       <ambientLight intensity={0.55} />
       <pointLight position={[0, 0, 5]} intensity={55} color={'#7be7ff'} />
 
-      <LogoPlane billboard />
+      <Suspense fallback={<LogoPlane billboard />}>
+        <LogoGLB />
+      </Suspense>
 
       {episodes.map((ep, i) => {
         const pos = episodePositions[i]
