@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Sphere, Html } from '@react-three/drei'
+import { OrbitControls, Sphere, Html, useTexture, Box, Torus, Cone, Cylinder, Octahedron } from '@react-three/drei'
 
 // Data for the episodes, same as the journey map
 const episodes = [
@@ -14,34 +14,50 @@ const episodes = [
     { number: 'EP08', short: 'Russell / Sound in Color', title: 'Russell & Sound in Color', description: 'The thesis statement for what DKTR N9NE actually sounds and looks like.', links: [{ label: 'Russell', href: 'https://youtu.be/ljofa1n-Hf0?si=gpyVnKswzAUNvrYo' }, { label: 'Sound in Color', href: 'https://youtu.be/SVjEUTiOvYs?si=6aBiyOBhXqA8GAu9' }], xpHook: 'Fans describe your sound in one color + one object.', cameo: false },
 ];
 
-function Core() {
-  return (
-    <Sphere args={[0.5, 64, 64]}>
-      <meshStandardMaterial color="#00e5ff" emissive="#00e5ff" emissiveIntensity={3} toneMapped={false} />
-    </Sphere>
-  );
+const geometries = [
+    <Box args={[0.2, 0.2, 0.2]} />,
+    <Torus args={[0.1, 0.04, 16, 48]} />,
+    <Cone args={[0.1, 0.2, 32]} />,
+    <Cylinder args={[0.1, 0.1, 0.2, 32]} />,
+    <Octahedron args={[0.12]} />,
+    <Sphere args={[0.12, 32, 32]} />,
+    <Torus args={[0.1, 0.04, 16, 4]} />,
+    <Box args={[0.2, 0.2, 0.2]} />,
+];
+
+
+function LogoPlane() {
+    const texture = useTexture('/n9ne-logo.jpg')
+    return (
+        <mesh>
+            <planeGeometry args={[2, 2]} />
+            <meshStandardMaterial map={texture} emissive="white" emissiveMap={texture} emissiveIntensity={0.2} toneMapped={false} transparent />
+        </mesh>
+    )
 }
 
-function Satellite({ episode, position, onClick }) {
+function Satellite({ episode, geometry, position, onClick }) {
   const meshRef = useRef();
   const [isHovered, setIsHovered] = useState(false);
 
+  useFrame((state, delta) => {
+    // Optional: make satellites bob up and down
+    meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5 + position[0]) * 0.2;
+  });
+
   return (
-    <Sphere
+    <mesh
       ref={meshRef}
       position={position}
-      args={[0.12, 32, 32]}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick(episode);
-      }}
+      onClick={(e) => { e.stopPropagation(); onClick(episode); }}
       onPointerOver={() => setIsHovered(true)}
       onPointerOut={() => setIsHovered(false)}
     >
+      {geometry}
       <meshStandardMaterial
         color={episode.cameo ? '#ffb84d' : '#ffffff'}
         emissive={episode.cameo ? '#ffb84d' : '#ffffff'}
-        emissiveIntensity={isHovered ? 2 : 0.5}
+        emissiveIntensity={isHovered ? 2.5 : 0.8}
         toneMapped={false}
       />
       {isHovered && (
@@ -49,31 +65,28 @@ function Satellite({ episode, position, onClick }) {
           <div className="tooltip">{episode.short}</div>
         </Html>
       )}
-    </Sphere>
+    </mesh>
   );
 }
 
 function Scene({ onSelectEpisode }) {
   const groupRef = useRef();
-  useFrame((state, delta) => {
-    // groupRef.current.rotation.y += delta * 0.1;
-  });
 
   return (
     <>
-      <ambientLight intensity={0.3} />
-      <pointLight position={[5, 5, 5]} intensity={1.5} />
-      <Core />
+      <ambientLight intensity={0.5} />
+      <pointLight position={[0, 0, 5]} intensity={50} color="#00e5ff" />
+      <LogoPlane />
       <group ref={groupRef}>
         {episodes.map((ep, i) => {
           const angle = (i / episodes.length) * 2 * Math.PI;
           const radius = 2.5;
           const x = radius * Math.cos(angle);
           const z = radius * Math.sin(angle);
-          return <Satellite key={ep.number} episode={ep} position={[x, 0, z]} onClick={onSelectEpisode} />;
+          return <Satellite key={ep.number} episode={ep} geometry={geometries[i % geometries.length]} position={[x, 0, z]} onClick={onSelectEpisode} />;
         })}
       </group>
-      <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.4} minPolarAngle={Math.PI / 3} maxPolarAngle={Math.PI * 2 / 3} />
+      <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.3} minPolarAngle={Math.PI / 3} maxPolarAngle={Math.PI * 2 / 3} />
     </>
   );
 }
