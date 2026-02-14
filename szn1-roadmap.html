@@ -81,6 +81,65 @@
     .legend-cameo { background: var(--cameo); }
     .legend-live { background: var(--live); }
 
+    .progress-wrap {
+      margin: 18px 0 20px;
+      padding: 12px 14px 14px;
+      border-radius: 14px;
+      background: rgba(8, 12, 26, 0.96);
+      border: 1px solid var(--border);
+      box-shadow: 0 14px 32px rgba(0,0,0,0.7);
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.1fr);
+      gap: 14px;
+    }
+    .progress-label {
+      font-size: 0.86rem;
+      color: var(--text-soft);
+      margin-bottom: 6px;
+    }
+    .bar-shell {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(4, 10, 20, 0.96);
+      border: 1px solid rgba(0,229,255,0.25);
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #00e5ff, #ff6ea8);
+      transition: width 0.3s ease;
+    }
+    .progress-meta {
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      margin-top: 4px;
+    }
+    .leaderboard {
+      font-size: 0.82rem;
+      color: var(--text-soft);
+    }
+    .lb-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3px;
+    }
+    .lb-rank {
+      width: 18px;
+      text-align: right;
+      margin-right: 6px;
+      opacity: 0.9;
+    }
+    .lb-name {
+      flex: 1;
+    }
+    .lb-xp {
+      font-variant-numeric: tabular-nums;
+      color: #e0f6ff;
+    }
+
     .episodes {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -157,6 +216,18 @@
 <body>
   <div id="root"></div>
   <script>
+    const totalEpisodes = 8;
+    const completedEpisodes = 3; // placeholder — later tie to actual profile state
+    const completionPercent = Math.round((completedEpisodes / totalEpisodes) * 100);
+
+    const leaderboard = [
+      { name: 'ArtFamLegend', xp: 2450 },
+      { name: 'HaikuHero', xp: 1875 },
+      { name: 'KaizenKrew', xp: 1630 },
+      { name: 'RoxyDayOne', xp: 1220 },
+      { name: 'SilentNine', xp: 880 },
+    ];
+
     const episodes = [
       {
         number: 'EP01',
@@ -302,6 +373,25 @@
             React.createElement('span', { className: 'nav-pill' },
               React.createElement('span', { className: 'legend-dot legend-cameo' }),
               'Cameo-only episodes — find & timestamp to earn XP'
+            )
+          ),
+          React.createElement('section', { className: 'progress-wrap' },
+            React.createElement('div', null,
+              React.createElement('div', { className: 'progress-label' }, `Season completion: ${completedEpisodes} / ${totalEpisodes} episodes`),
+              React.createElement('div', { className: 'bar-shell' },
+                React.createElement('div', { className: 'bar-fill', style: { width: `${completionPercent}%` } })
+              ),
+              React.createElement('div', { className: 'progress-meta' }, `Approx. ${completionPercent}% of SZN 1 journey. Unlock more XP by completing quests and cameo hunts.`)
+            ),
+            React.createElement('div', { className: 'leaderboard' },
+              React.createElement('div', { className: 'progress-label' }, 'Top XP This Season (sample data)'),
+              leaderboard.map((entry, idx) => (
+                React.createElement('div', { key: entry.name, className: 'lb-row' },
+                  React.createElement('span', { className: 'lb-rank' }, `#${idx + 1}`),
+                  React.createElement('span', { className: 'lb-name' }, entry.name),
+                  React.createElement('span', { className: 'lb-xp' }, `${entry.xp} XP`)
+                )
+              ))
             )
           ),
           React.createElement('section', { className: 'episodes' },
