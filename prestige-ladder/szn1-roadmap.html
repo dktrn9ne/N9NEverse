@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DKTR N9NE — SZN 1 Roadmap</title>
+  <title>DKTR N9NE — SZN 1 Journey Map</title>
   <style>
     :root {
       --bg: #050711;
-      --card: rgba(8, 12, 26, 0.96);
-      --border: rgba(0, 229, 255, 0.25);
+      --track: rgba(6, 14, 30, 0.96);
+      --card: rgba(8, 12, 26, 0.98);
+      --border: rgba(0, 229, 255, 0.32);
       --accent: #00e5ff;
+      --accent-soft: rgba(0, 229, 255, 0.2);
       --text-soft: rgba(214, 242, 255, 0.9);
       --cameo: #ffb84d;
       --live: #ff4f8f;
@@ -25,11 +27,11 @@
     .shell {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 28px 18px 60px;
+      padding: 26px 16px 60px;
     }
     header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
     .pill {
       display: inline-flex;
@@ -60,7 +62,7 @@
       display: flex;
       justify-content: center;
       gap: 10px;
-      margin: 18px 0 20px;
+      margin: 16px 0 18px;
       flex-wrap: wrap;
     }
     .nav-pill {
@@ -81,8 +83,168 @@
     .legend-cameo { background: var(--cameo); }
     .legend-live { background: var(--live); }
 
+    .journey-wrap {
+      border-radius: 18px;
+      padding: 16px 14px 18px;
+      background: radial-gradient(circle at top left, rgba(0,229,255,0.18), rgba(3,9,20,0.98));
+      border: 1px solid var(--border);
+      box-shadow: 0 22px 50px rgba(0,0,0,0.9);
+      margin-bottom: 18px;
+    }
+    .track-shell {
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+    .track {
+      min-width: 720px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      padding: 8px 4px 4px;
+    }
+    .track-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 2px;
+      transform: translateY(-50%);
+      background: linear-gradient(90deg, rgba(0,229,255,0.7), rgba(255,110,168,0.5));
+      opacity: 0.6;
+    }
+    .node-shell {
+      position: relative;
+      flex: 0 0 auto;
+      width: 80px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .node-dot {
+      position: relative;
+      width: 26px;
+      height: 26px;
+      margin: 0 auto 4px;
+      border-radius: 999px;
+      border: 2px solid rgba(0,229,255,0.6);
+      background: radial-gradient(circle at top, #0ff, #004b66);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px rgba(0,229,255,0.7);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+    .node-dot.cameo {
+      border-color: rgba(255,184,77,0.9);
+      background: radial-gradient(circle at top, #ffdd99, #7a4b00);
+      box-shadow: 0 0 14px rgba(255,184,77,0.8);
+    }
+    .node-dot.current {
+      transform: scale(1.06);
+      box-shadow: 0 0 20px rgba(0,229,255,1);
+    }
+    .node-label {
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      opacity: 0.9;
+    }
+    .node-ep {
+      font-size: 0.72rem;
+      opacity: 0.8;
+    }
+
+    .avatar-marker {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #fff;
+      box-shadow: 0 0 18px rgba(255,255,255,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      color: #021015;
+      border: 1px solid rgba(0,0,0,0.6);
+    }
+
+    .detail-grid {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.1fr);
+      gap: 14px;
+    }
+    .detail-card {
+      border-radius: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 12px 12px 14px;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.85);
+      font-size: 0.86rem;
+      color: var(--text-soft);
+    }
+    .detail-title {
+      margin: 0 0 4px;
+      font-size: 0.98rem;
+    }
+    .detail-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,229,255,0.35);
+      background: rgba(2, 14, 22, 0.96);
+      margin-bottom: 6px;
+    }
+    .detail-links {
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .detail-link {
+      font-size: 0.8rem;
+      text-decoration: none;
+      color: var(--accent);
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,229,255,0.35);
+      background: rgba(2, 14, 22, 0.96);
+    }
+    .detail-meta {
+      margin-top: 6px;
+      font-size: 0.8rem;
+    }
+    .detail-meta strong { color: #e0f6ff; }
+
+    .xp-card {
+      border-radius: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 12px 12px 14px;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.85);
+      font-size: 0.84rem;
+    }
+    .xp-title {
+      margin: 0 0 4px;
+      font-size: 0.9rem;
+    }
+    .xp-text {
+      margin: 0 0 6px;
+      color: var(--text-soft);
+    }
+    .xp-note {
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      opacity: 0.85;
+    }
+
     .progress-wrap {
-      margin: 18px 0 20px;
+      margin-top: 20px;
       padding: 12px 14px 14px;
       border-radius: 14px;
       background: rgba(8, 12, 26, 0.96);
@@ -132,83 +294,16 @@
       margin-right: 6px;
       opacity: 0.9;
     }
-    .lb-name {
-      flex: 1;
-    }
+    .lb-name { flex: 1; }
     .lb-xp {
       font-variant-numeric: tabular-nums;
       color: #e0f6ff;
     }
 
-    .episodes {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 14px;
+    @media (max-width: 900px) {
+      .detail-grid { grid-template-columns: 1fr; }
+      .progress-wrap { grid-template-columns: 1fr; }
     }
-    .episode-card {
-      border-radius: 16px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.85);
-      padding: 14px 14px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .ep-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-    .ep-title {
-      font-size: 0.95rem;
-      margin: 0;
-    }
-    .ep-number {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--text-soft);
-    }
-    .ep-tag {
-      font-size: 0.75rem;
-      padding: 3px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(0,229,255,0.35);
-      background: rgba(2, 14, 22, 0.96);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .ep-body {
-      font-size: 0.85rem;
-      color: var(--text-soft);
-    }
-    .ep-links {
-      margin-top: 6px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .ep-link {
-      font-size: 0.8rem;
-      text-decoration: none;
-      color: var(--accent);
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(0,229,255,0.35);
-      background: rgba(2, 14, 22, 0.96);
-    }
-    .ep-foot {
-      margin-top: 8px;
-      font-size: 0.8rem;
-      color: var(--text-soft);
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-    .ep-foot strong { color: #e0f6ff; }
   </style>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -216,21 +311,10 @@
 <body>
   <div id="root"></div>
   <script>
-    const totalEpisodes = 8;
-    const completedEpisodes = 3; // placeholder — later tie to actual profile state
-    const completionPercent = Math.round((completedEpisodes / totalEpisodes) * 100);
-
-    const leaderboard = [
-      { name: 'ArtFamLegend', xp: 2450 },
-      { name: 'HaikuHero', xp: 1875 },
-      { name: 'KaizenKrew', xp: 1630 },
-      { name: 'RoxyDayOne', xp: 1220 },
-      { name: 'SilentNine', xp: 880 },
-    ];
-
     const episodes = [
       {
         number: 'EP01',
+        short: 'Passport Girl',
         title: 'Passport Girl — Origin Files',
         role: 'Full DKTR N9NE narrative',
         tag: 'Lore / Origin',
@@ -240,9 +324,11 @@
           { label: 'Tumblr Archive', href: 'https://dazednconfuzed.tumblr.com' },
         ],
         xpHook: 'Comment your wildest old internet alter ego. Selected entries read on stream for XP/CRED.',
+        cameo: false,
       },
       {
         number: 'EP02',
+        short: 'No Gold Anything',
         title: 'No Gold Anything — Cameo Hunt',
         role: 'Cameo only',
         tag: 'Cameo Challenge',
@@ -255,17 +341,20 @@
       },
       {
         number: 'EP03',
+        short: 'Elbow TV',
         title: 'Elbow TV — Mayweather vs Tebow',
         role: 'Full DKTR N9NE narrative',
         tag: 'Comedy / Commentary',
-        description: 'You react to the Elbow TV clip and talk about comedy, media, and how this type of content fits into the N9NEVERSE next to the music.',
+        description: 'Reacting to the Elbow TV clip and talking about comedy, media, and how this content sits next to the music inside the N9NEVERSE.',
         links: [
           { label: 'Elbow TV: Mayweather vs Tebow', href: 'https://youtu.be/yjp3253WjmQ?si=MiBFjQp8AoQtiDsW' },
         ],
         xpHook: 'Fans pitch absurd matchups in comments; best ones get turned into mini bits on stream for XP.',
+        cameo: false,
       },
       {
         number: 'EP04',
+        short: 'Dream Girl',
         title: 'Dream Girl ft Mr Thomas',
         role: 'Full DKTR N9NE narrative',
         tag: 'Music / Duality',
@@ -274,9 +363,11 @@
           { label: 'Dream Girl ft Mr Thomas', href: 'https://youtu.be/go-mLHuspuc?si=3u1fIPlztJaKSdbN' },
         ],
         xpHook: 'Fans drop “dream person” tropes; best ones become Haiku or future lyrics with XP rewards.',
+        cameo: false,
       },
       {
         number: 'EP05',
+        short: 'Chief Keef / 50 / Chop',
         title: 'Chief Keef / 50 / Young Chop — Cameo Hunt',
         role: 'Cameo only',
         tag: 'Cameo Challenge',
@@ -289,6 +380,7 @@
       },
       {
         number: 'EP06',
+        short: 'Old Thing Back',
         title: 'Old Thing Back',
         role: 'Full DKTR N9NE narrative',
         tag: 'Nostalgia / Return',
@@ -297,9 +389,11 @@
           { label: 'Old Thing Back', href: 'https://youtu.be/cZmULgDLi8g?si=YrTuVP590ZOi9DRf' },
         ],
         xpHook: 'Fans vote on which “old thing” (song, video, blog post) should be restored or remastered in SZN 2 for XP.',
+        cameo: false,
       },
       {
         number: 'EP07',
+        short: 'Scared of The D',
         title: 'Scared of The D',
         role: 'Full DKTR N9NE narrative',
         tag: 'Place / Fear',
@@ -308,9 +402,11 @@
           { label: 'Scared of The D', href: 'https://youtu.be/6ekFvpry5SY?si=Du64DOgUl49SeGq5' },
         ],
         xpHook: 'Fans share the city they are lowkey scared of and why; best responses get read on stream for XP.',
+        cameo: false,
       },
       {
         number: 'EP08',
+        short: 'Russell / Sound in Color',
         title: 'Russell & Sound in Color',
         role: 'Full DKTR N9NE narrative',
         tag: 'Craft / Aesthetic Thesis',
@@ -320,82 +416,143 @@
           { label: 'Sound in Color', href: 'https://youtu.be/SVjEUTiOvYs?si=6aBiyOBhXqA8GAu9' },
         ],
         xpHook: 'Fans describe your sound in one color + one object; best become canon lore and earn XP.',
+        cameo: false,
       },
     ];
 
-    function EpisodeCard({ ep }) {
-      return (
-        React.createElement('article', { className: 'episode-card' },
-          React.createElement('div', { className: 'ep-header' },
-            React.createElement('div', null,
-              React.createElement('div', { className: 'ep-number' }, ep.number),
-              React.createElement('h2', { className: 'ep-title' }, ep.title),
-            ),
-            React.createElement('span', { className: 'ep-tag' },
-              ep.cameo && React.createElement('span', { className: 'legend-dot legend-cameo' }),
-              !ep.cameo && React.createElement('span', { className: 'legend-dot legend-live' }),
-              ep.tag
-            )
-          ),
-          React.createElement('div', { className: 'ep-body' }, ep.description),
-          React.createElement('div', { className: 'ep-links' },
-            ep.links.map((link, idx) => (
-              React.createElement('a', {
-                key: idx,
-                className: 'ep-link',
-                href: link.href,
-                target: '_blank',
-                rel: 'noopener noreferrer'
-              }, link.label)
-            ))
-          ),
-          React.createElement('div', { className: 'ep-foot' },
-            React.createElement('span', null, React.createElement('strong', null, 'Role: '), ep.role),
-            React.createElement('span', null, React.createElement('strong', null, 'XP Hook: '), ep.xpHook)
+    const totalEpisodes = episodes.length;
+    const completedEpisodes = 3; // placeholder for now
+    const completionPercent = Math.round((completedEpisodes / totalEpisodes) * 100);
+
+    const leaderboard = [
+      { name: 'ArtFamLegend', xp: 2450 },
+      { name: 'HaikuHero', xp: 1875 },
+      { name: 'KaizenKrew', xp: 1630 },
+      { name: 'RoxyDayOne', xp: 1220 },
+      { name: 'SilentNine', xp: 880 },
+    ];
+
+    function Node({ ep, index, currentIndex, onSelect }) {
+      const isCurrent = index === currentIndex;
+      const dotClasses = ['node-dot'];
+      if (ep.cameo) dotClasses.push('cameo');
+      if (isCurrent) dotClasses.push('current');
+
+      return React.createElement(
+        'div',
+        { className: 'node-shell', onClick: () => onSelect(index) },
+        React.createElement('div', { style: { position: 'relative' } },
+          isCurrent && React.createElement('div', { className: 'avatar-marker' }, 'N9'),
+          React.createElement('div', { className: dotClasses.join(' ') }, ep.number.replace('EP', '')),
+        ),
+        React.createElement('div', { className: 'node-label' }, ep.short),
+        React.createElement('div', { className: 'node-ep' }, ep.number)
+      );
+    }
+
+    function EpisodeDetail({ ep }) {
+      return React.createElement(
+        'section',
+        { className: 'detail-card' },
+        React.createElement('div', { className: 'detail-tag' },
+          ep.cameo
+            ? [React.createElement('span', { key: 'dot', className: 'legend-dot legend-cameo' }), 'Cameo Challenge']
+            : [React.createElement('span', { key: 'dot', className: 'legend-dot legend-live' }), ep.tag]
+        ),
+        React.createElement('h2', { className: 'detail-title' }, ep.title),
+        React.createElement('p', null, ep.description),
+        React.createElement('div', { className: 'detail-links' },
+          ep.links.map((link, idx) => (
+            React.createElement('a', {
+              key: idx,
+              className: 'detail-link',
+              href: link.href,
+              target: '_blank',
+              rel: 'noopener noreferrer'
+            }, link.label)
+          ))
+        ),
+        React.createElement('div', { className: 'detail-meta' },
+          React.createElement('span', null,
+            React.createElement('strong', null, 'Role: '), ep.role
           )
         )
       );
     }
 
+    function XpDetail({ ep }) {
+      return React.createElement(
+        'section',
+        { className: 'xp-card' },
+        React.createElement('h3', { className: 'xp-title' }, 'XP Quest for this Episode'),
+        React.createElement('p', { className: 'xp-text' }, ep.xpHook),
+        React.createElement('p', { className: 'xp-note' },
+          ep.cameo
+            ? 'Cameo challenges award extra XP and potential CRED. You must correctly identify where you appear and submit timestamps through the N9NEVERSE portal or Discord.'
+            : 'Standard narrative episodes award XP for participation, comments, prompts, and appearing in live Q&A or Haiku responses.'
+        )
+      );
+    }
+
     function App() {
-      return (
-        React.createElement('div', { className: 'shell' },
-          React.createElement('header', null,
-            React.createElement('div', { className: 'pill' }, 'SZN 1 — Content Roadmap'),
-            React.createElement('h1', null, 'Passport to the N9NEVERSE'),
-            React.createElement('p', null, 'Season 1 is an 8-episode arc built from existing artifacts, cameos, and music. Fans move from watching to playing by hunting cameos, responding to prompts, and earning XP in the Prestige Ladder.')
+      const [currentIndex, setCurrentIndex] = React.useState(0);
+      const current = episodes[currentIndex];
+
+      return React.createElement(
+        'div',
+        { className: 'shell' },
+        React.createElement('header', null,
+          React.createElement('div', { className: 'pill' }, 'SZN 1 — Journey Map'),
+          React.createElement('h1', null, 'Passport to the N9NEVERSE'),
+          React.createElement('p', null, 'Season 1 as a path, not a playlist. Each stop on the line is an episode built from existing artifacts, cameos, and music. Fans move from watching to playing by completing quests and cameo hunts for XP.')
+        ),
+        React.createElement('nav', null,
+          React.createElement('span', { className: 'nav-pill' },
+            React.createElement('span', { className: 'legend-dot legend-live' }),
+            'Full DKTR N9NE narrative episodes'
           ),
-          React.createElement('nav', null,
-            React.createElement('span', { className: 'nav-pill' },
-              React.createElement('span', { className: 'legend-dot legend-live' }),
-              'Full DKTR N9NE narrative episodes'
-            ),
-            React.createElement('span', { className: 'nav-pill' },
-              React.createElement('span', { className: 'legend-dot legend-cameo' }),
-              'Cameo-only episodes — find & timestamp to earn XP'
-            )
-          ),
-          React.createElement('section', { className: 'progress-wrap' },
-            React.createElement('div', null,
-              React.createElement('div', { className: 'progress-label' }, `Season completion: ${completedEpisodes} / ${totalEpisodes} episodes`),
-              React.createElement('div', { className: 'bar-shell' },
-                React.createElement('div', { className: 'bar-fill', style: { width: `${completionPercent}%` } })
-              ),
-              React.createElement('div', { className: 'progress-meta' }, `Approx. ${completionPercent}% of SZN 1 journey. Unlock more XP by completing quests and cameo hunts.`)
-            ),
-            React.createElement('div', { className: 'leaderboard' },
-              React.createElement('div', { className: 'progress-label' }, 'Top XP This Season (sample data)'),
-              leaderboard.map((entry, idx) => (
-                React.createElement('div', { key: entry.name, className: 'lb-row' },
-                  React.createElement('span', { className: 'lb-rank' }, `#${idx + 1}`),
-                  React.createElement('span', { className: 'lb-name' }, entry.name),
-                  React.createElement('span', { className: 'lb-xp' }, `${entry.xp} XP`)
-                )
+          React.createElement('span', { className: 'nav-pill' },
+            React.createElement('span', { className: 'legend-dot legend-cameo' }),
+            'Cameo-only episodes — find & timestamp to earn extra XP'
+          )
+        ),
+        React.createElement('section', { className: 'journey-wrap' },
+          React.createElement('div', { className: 'track-shell' },
+            React.createElement('div', { className: 'track', style: { position: 'relative' } },
+              React.createElement('div', { className: 'track-line' }),
+              episodes.map((ep, idx) => (
+                React.createElement(Node, {
+                  key: ep.number,
+                  ep,
+                  index: idx,
+                  currentIndex,
+                  onSelect: setCurrentIndex,
+                })
               ))
             )
           ),
-          React.createElement('section', { className: 'episodes' },
-            episodes.map(ep => React.createElement(EpisodeCard, { key: ep.number, ep }))
+          React.createElement('div', { className: 'detail-grid' },
+            React.createElement(EpisodeDetail, { ep: current }),
+            React.createElement(XpDetail, { ep: current })
+          )
+        ),
+        React.createElement('section', { className: 'progress-wrap' },
+          React.createElement('div', null,
+            React.createElement('div', { className: 'progress-label' }, `Season completion (sample): ${completedEpisodes} / ${totalEpisodes} episodes`),
+            React.createElement('div', { className: 'bar-shell' },
+              React.createElement('div', { className: 'bar-fill', style: { width: `${completionPercent}%` } })
+            ),
+            React.createElement('div', { className: 'progress-meta' }, `Approx. ${completionPercent}% of SZN 1 journey. Unlock more XP by completing quests and cameo hunts.`)
+          ),
+          React.createElement('div', { className: 'leaderboard' },
+            React.createElement('div', { className: 'progress-label' }, 'Top XP This Season (sample data)'),
+            leaderboard.map((entry, idx) => (
+              React.createElement('div', { key: entry.name, className: 'lb-row' },
+                React.createElement('span', { className: 'lb-rank' }, `#${idx + 1}`),
+                React.createElement('span', { className: 'lb-name' }, entry.name),
+                React.createElement('span', { className: 'lb-xp' }, `${entry.xp} XP`)
+              )
+            ))
           )
         )
       );
