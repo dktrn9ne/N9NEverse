@@ -286,20 +286,8 @@ const geometries = [
     </mesh>
   ),
 
-  // EP02 — clean stack of silver bullion bars
-  (props) => (
-    <group {...props}>
-      <mesh position={[0, 0.03, 0]} rotation={[0.08, 0.18, 0.02]}>
-        <Box args={[0.26, 0.08, 0.14]} />
-      </mesh>
-      <mesh position={[0.01, -0.02, 0.01]} rotation={[0.02, -0.12, -0.01]}>
-        <Box args={[0.26, 0.08, 0.14]} />
-      </mesh>
-      <mesh position={[-0.015, -0.07, -0.01]} rotation={[-0.03, 0.09, 0.01]}>
-        <Box args={[0.26, 0.08, 0.14]} />
-      </mesh>
-    </group>
-  ),
+  // EP02 handled by <BullionBars /> so we can apply per-bar materials/textures reliably.
+  null,
 
   // EP03
   (props) => (
@@ -350,6 +338,7 @@ function EpisodeObject({
   map,
   passportMats,
   passportEmbossTex,
+  hasOwnMaterials,
 }) {
   const ref = useRef()
 
@@ -384,7 +373,7 @@ function EpisodeObject({
     >
       {isPassport ? <boxGeometry args={[0.26, 0.18, 0.06]} /> : geometry}
 
-      {!isPassport && (
+      {!isPassport && !hasOwnMaterials && (
         <meshStandardMaterial
           map={map || null}
           color={map ? '#ffffff' : baseColor}
@@ -424,6 +413,74 @@ function JourneyScene({ tRef, onActiveEpisodeChange }) {
   const manualOverrideUntilRef = useRef(0)
 
   const passportTex = useTexture('/passport-cover.jpg')
+
+  const bullionTex = useMemo(() => {
+    // Procedural brushed metal texture (no external file; reliable everywhere)
+    const canvas = document.createElement('canvas')
+    canvas.width = 256
+    canvas.height = 256
+    const ctx = canvas.getContext('2d')
+
+    // base metal
+    ctx.fillStyle = '#cfd6df'
+    ctx.fillRect(0, 0, 256, 256)
+
+    // brushed streaks
+    for (let i = 0; i < 900; i++) {
+      const y = Math.random() * 256
+      const a = 0.06 + Math.random() * 0.08
+      ctx.fillStyle = `rgba(255,255,255,${a})`
+      ctx.fillRect(0, y, 256, 1)
+    }
+
+    // subtle noise
+    for (let i = 0; i < 4000; i++) {
+      const x = Math.random() * 256
+      const y = Math.random() * 256
+      const g = 200 + Math.random() * 35
+      ctx.fillStyle = `rgba(${g},${g},${g},0.06)`
+      ctx.fillRect(x, y, 1, 1)
+    }
+
+    const tex = new THREE.CanvasTexture(canvas)
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping
+    tex.repeat.set(2, 2)
+    tex.colorSpace = THREE.SRGBColorSpace
+    tex.anisotropy = 4
+    tex.needsUpdate = true
+    return tex
+  }, [])
+
+  const BullionBars = useMemo(() => {
+    return function BullionBarsInner() {
+      const matProps = {
+        map: bullionTex,
+        color: '#ffffff',
+        metalness: 0.95,
+        roughness: 0.15,
+        emissive: '#cfd6df',
+        emissiveIntensity: 0.12,
+        toneMapped: false,
+      }
+
+      return (
+        <group>
+          <mesh position={[0, 0.03, 0]} rotation={[0.08, 0.18, 0.02]}>
+            <Box args={[0.26, 0.08, 0.14]} />
+            <meshStandardMaterial {...matProps} />
+          </mesh>
+          <mesh position={[0.01, -0.02, 0.01]} rotation={[0.02, -0.12, -0.01]}>
+            <Box args={[0.26, 0.08, 0.14]} />
+            <meshStandardMaterial {...matProps} />
+          </mesh>
+          <mesh position={[-0.015, -0.07, -0.01]} rotation={[-0.03, 0.09, 0.01]}>
+            <Box args={[0.26, 0.08, 0.14]} />
+            <meshStandardMaterial {...matProps} />
+          </mesh>
+        </group>
+      )
+    }
+  }, [bullionTex])
 
   const passportEmbossTex = useMemo(() => {
     // lightweight gold emboss overlay texture (iOS-safe)
@@ -585,6 +642,7 @@ function JourneyScene({ tRef, onActiveEpisodeChange }) {
       {episodes.map((ep, i) => {
         const pos = episodePositions[i]
         const Geometry = geometries[i % geometries.length]
+        const isBullion = i === 1
 
         const stopIdx = nearestIndex(stops, tRef.current)
         const activeEpisodeIndex = stopIdx - 1
@@ -597,7 +655,8 @@ function JourneyScene({ tRef, onActiveEpisodeChange }) {
           <EpisodeObject
             key={ep.number}
             episode={ep}
-            geometry={<Geometry />}
+            geometry={isBullion ? <BullionBars /> : <Geometry />}
+            hasOwnMaterials={isBullion}
             position={[pos.x, pos.y, pos.z]}
             isActive={isActive}
             activeWeight={activeWeight}
