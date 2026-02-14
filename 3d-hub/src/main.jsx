@@ -65,6 +65,10 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+// Hide the non-React boot overlay once React actually mounts.
+const boot = document.getElementById('boot')
+if (boot) boot.style.display = 'none'
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>

@@ -7,7 +7,29 @@
     <title>Vite + React</title>
   </head>
   <body>
+    <div id="boot" style="position:fixed;inset:0;background:#020308;color:#fff;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;padding:18px;">
+      <div style="max-width:920px;margin:0 auto;">
+        <div style="opacity:.7;letter-spacing:.22em;font-size:12px;text-transform:uppercase;">N9NEVERSE</div>
+        <h1 style="margin:10px 0 6px;font-size:18px;">Loading 3D Hub…</h1>
+        <p style="margin:0;opacity:.8;line-height:1.45;">If this stays stuck, your browser may be blocking WebGL or the app script failed to load.</p>
+        <p style="margin:12px 0 0;opacity:.7;font-size:13px;">Try: close Safari completely → reopen → reload.</p>
+      </div>
+    </div>
     <div id="root"></div>
+    <script>
+      // If the main script throws before React mounts, surface the error.
+      window.addEventListener('error', function (e) {
+        var boot = document.getElementById('boot');
+        if (!boot) return;
+        boot.innerHTML = '<div style="max-width:920px;margin:0 auto;">'
+          + '<div style="opacity:.7;letter-spacing:.22em;font-size:12px;text-transform:uppercase;">N9NEVERSE — DIAGNOSTIC</div>'
+          + '<h1 style="margin:10px 0 6px;font-size:18px;">Script error while loading.</h1>'
+          + '<pre style="margin-top:14px;padding:14px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);white-space:pre-wrap;word-break:break-word;">'
+          + String(e.message || e.error || e) + '\n' + String(e.filename || '') + ':' + String(e.lineno || '')
+          + '</pre>'
+          + '</div>';
+      });
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
