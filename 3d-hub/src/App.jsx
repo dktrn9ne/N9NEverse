@@ -216,47 +216,18 @@ function LogoGLB() {
     scene.traverse((obj) => {
       if (!obj.isMesh) return
 
-      // Ensure we can see both sides if the mesh is thin
-      if (obj.material) {
-        const applyToMaterial = (mat) => {
-          if (!mat) return
+      // Replace materials with MeshBasicMaterial for maximum cross-device reliability.
+      // (BasicMaterial ignores lights; avoids iOS-specific PBR/precision weirdness.)
+      const hasUV = Boolean(obj.geometry?.attributes?.uv)
+      const nextMat = new THREE.MeshBasicMaterial({
+        color: hasUV ? 0xffffff : 0xffb6d5,
+        map: hasUV ? texture : null,
+        side: THREE.DoubleSide,
+      })
+      nextMat.toneMapped = false
 
-          mat.toneMapped = false
-          mat.color = new THREE.Color('#ffffff')
-          mat.metalness = 0.55
-          mat.roughness = 0.18
-          mat.side = THREE.DoubleSide
-          mat.vertexColors = false
-          mat.transparent = false
-          mat.opacity = 1
-          mat.depthWrite = true
-          mat.depthTest = true
-          mat.alphaTest = 0
-          mat.onBeforeCompile = undefined
-
-          // turn off emissive glow for a more "pendant" look
-          if ('emissive' in mat) {
-            mat.emissive = new THREE.Color('#000000')
-            mat.emissiveIntensity = 0
-          }
-
-          const hasUV = Boolean(obj.geometry?.attributes?.uv)
-          if (hasUV) {
-            mat.map = texture
-          } else {
-            // If the GLB has no UVs, avoid shader hacks that may break on iOS.
-            // We'll keep it visible and we can re-introduce a proper triplanar shader later.
-            mat.map = null
-            mat.color = new THREE.Color('#ffb6d5')
-          }
-
-          mat.needsUpdate = true
-        }
-
-        if (Array.isArray(obj.material)) obj.material.forEach(applyToMaterial)
-        else applyToMaterial(obj.material)
-      }
-
+      obj.material = nextMat
+      obj.frustumCulled = false
       obj.castShadow = false
       obj.receiveShadow = false
     })
@@ -472,7 +443,9 @@ function JourneyScene({ tRef, onActiveEpisodeChange }) {
       <ambientLight intensity={0.55} />
       <pointLight position={[0, 0, 5]} intensity={55} color={'#7be7ff'} />
 
-      <Suspense fallback={<LogoPlane billboard />}>
+      {/* Always render a simple center marker so we can never be "invisible" */}
+      <LogoPlane billboard />
+      <Suspense fallback={null}>
         <LogoGLB />
       </Suspense>
 
