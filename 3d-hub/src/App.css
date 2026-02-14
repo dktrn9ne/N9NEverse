@@ -177,7 +177,7 @@
   position: fixed;
   left: 18px;
   right: 18px;
-  bottom: 18px;
+  bottom: 78px;
   max-width: 820px;
   margin: 0 auto;
 
@@ -271,4 +271,86 @@
 .xp-hook {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.8);
+}
+
+.xp-actions {
+  margin-top: 12px;
+}
+
+.xp-actions__row {
+  display: flex;
+  gap: 10px;
+}
+
+.xp-input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+  outline: none;
+}
+
+.xp-submit {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(123, 231, 255, 0.22);
+  background: rgba(123, 231, 255, 0.12);
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+}
+
+.xp-submit:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.xp-actions__meta {
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.progress {
+  position: fixed;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  max-width: 820px;
+  margin: 0 auto;
+  z-index: 18;
+  pointer-events: none;
+
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(6, 8, 16, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(14px);
+
+  color: rgba(255, 255, 255, 0.86);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+}
+
+.progress__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.progress__bar {
+  margin-top: 10px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  overflow: hidden;
+}
+
+.progress__barFill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, rgba(123,231,255,0.2), rgba(123,231,255,0.95));
 }

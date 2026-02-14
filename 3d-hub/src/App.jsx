@@ -639,8 +639,12 @@ function JourneyScene({ tRef, onActiveEpisodeChange }) {
 }
 
 // ---- UI -----------------------------------------------------------------
-function DetailPanel({ episode, isMoving, onClose }) {
+function DetailPanel({ episode, isMoving, onClose, onWatch, onSubmit, progress }) {
+  const [input, setInput] = useState('')
   if (!episode) return null
+
+  const state = progress?.episodes?.[episode.number] || {}
+
   return (
     <div className={'detail-panel' + (isMoving ? ' detail-panel--compact' : '')}>
       <div className="detail-panel__top">
@@ -654,8 +658,14 @@ function DetailPanel({ episode, isMoving, onClose }) {
       <p>{episode.description}</p>
 
       <div className="links">
-        {episode.links.map((link) => (
-          <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer">
+        {episode.links.map((link, idx) => (
+          <a
+            key={link.href}
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => onWatch?.(episode.number, idx)}
+          >
             {link.label}
           </a>
         ))}
@@ -663,6 +673,32 @@ function DetailPanel({ episode, isMoving, onClose }) {
 
       <div className="xp-hook">
         <strong>XP Hook:</strong> {episode.xpHook}
+      </div>
+
+      <div className="xp-actions">
+        <div className="xp-actions__row">
+          <input
+            className="xp-input"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={episode.cameo ? 'Drop timestamp / proof…' : 'Your answer…'}
+          />
+          <button
+            className="xp-submit"
+            onClick={() => {
+              const v = input.trim()
+              if (!v) return
+              onSubmit?.(episode.number, v)
+              setInput('')
+            }}
+            disabled={state.submitted}
+          >
+            {state.submitted ? 'Submitted' : 'Submit (+XP)'}
+          </button>
+        </div>
+        {state.submitted && state.submission && (
+          <div className="xp-actions__meta">Saved: “{state.submission}”</div>
+        )}
       </div>
     </div>
   )
@@ -693,7 +729,25 @@ function DesktopChrome({ activeIndex, isHub }) {
     <div className="chrome">
       <div className="chrome__left">N9NEVERSE</div>
       <div className="chrome__center">{isHub ? '3D Hub' : `${ep?.number} — ${ep?.short}`}</div>
-      <div className="chrome__right">Scroll</div>
+      <div className="chrome__right">Local XP</div>
+    </div>
+  )
+}
+
+function ProgressBar({ progress }) {
+  const completed = progress?.episodesCompleted || 0
+  const total = episodes.length
+  const pct = total ? Math.round((completed / total) * 100) : 0
+
+  return (
+    <div className="progress">
+      <div className="progress__row">
+        <div className="progress__label">XP {progress?.xpTotal || 0}</div>
+        <div className="progress__label">Progress {completed}/{total}</div>
+      </div>
+      <div className="progress__bar" aria-hidden>
+        <div className="progress__barFill" style={{ width: pct + '%' }} />
+      </div>
     </div>
   )
 }
@@ -728,7 +782,35 @@ function Overlay({ activeIndex, isHub, hintVisible, isDesktop }) {
 }
 
 // ---- App ----------------------------------------------------------------
-export default function App() {
+export default function loadProgress() {
+  try {
+    const raw = localStorage.getItem('n9neverse_progress_v1')
+    if (!raw) return null
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
+function defaultProgress() {
+  const eps = {}
+  for (const ep of episodes) {
+    eps[ep.number] = { visited: false, watched: false, submitted: false, xp: 0, submission: '' }
+  }
+  return {
+    xpTotal: 0,
+    episodesCompleted: 0,
+    episodes: eps,
+  }
+}
+
+function computeTotals(p) {
+  const episodesCompleted = Object.values(p.episodes).filter((e) => e.submitted || e.watched || e.visited).length
+  const xpTotal = Object.values(p.episodes).reduce((sum, e) => sum + (e.xp || 0), 0)
+  return { ...p, episodesCompleted, xpTotal }
+}
+
+function App() {
   // progress state kept in refs for smoothness
   const tRef = useRef(0)
   const targetRef = useRef(0)
@@ -741,6 +823,18 @@ export default function App() {
   const [hintVisible, setHintVisible] = useState(true)
   const [isDesktop, setIsDesktop] = useState(false)
   const [ready, setReady] = useState(false)
+
+  const [progress, setProgress] = useState(() => computeTotals(loadProgress() || defaultProgress()))
+
+  const persist = (next) => {
+    const computed = computeTotals(next)
+    setProgress(computed)
+    try {
+      localStorage.setItem('n9neverse_progress_v1', JSON.stringify(computed))
+    } catch {
+      // ignore
+    }
+  }
 
   const stops = useMemo(() => {
     const EP_COUNT = episodes.length
@@ -820,6 +914,49 @@ export default function App() {
     return () => mql?.removeEventListener?.('change', update)
   }, [])
 
+  const awardVisited = (epNumber) => {
+    persist({
+      ...progress,
+      episodes: {
+        ...progress.episodes,
+        [epNumber]: {
+          ...progress.episodes[epNumber],
+          visited: true,
+          xp: (progress.episodes[epNumber]?.xp || 0) + (progress.episodes[epNumber]?.visited ? 0 : 5),
+        },
+      },
+    })
+  }
+
+  const awardWatched = (epNumber) => {
+    persist({
+      ...progress,
+      episodes: {
+        ...progress.episodes,
+        [epNumber]: {
+          ...progress.episodes[epNumber],
+          watched: true,
+          xp: (progress.episodes[epNumber]?.xp || 0) + (progress.episodes[epNumber]?.watched ? 0 : 10),
+        },
+      },
+    })
+  }
+
+  const awardSubmitted = (epNumber, submission) => {
+    persist({
+      ...progress,
+      episodes: {
+        ...progress.episodes,
+        [epNumber]: {
+          ...progress.episodes[epNumber],
+          submitted: true,
+          submission,
+          xp: (progress.episodes[epNumber]?.xp || 0) + (progress.episodes[epNumber]?.submitted ? 0 : 25),
+        },
+      },
+    })
+  }
+
   return (
     <div className={"app" + (isDesktop ? ' app--desktop' : '')}>
       <Canvas
@@ -858,15 +995,27 @@ export default function App() {
           }}
           onActiveEpisodeChange={(idx) => {
             setActiveIndex(idx)
-            if (idx >= 0) setSelectedIndex(idx)
+            if (idx >= 0) {
+              setSelectedIndex(idx)
+              const epNumber = episodes[idx]?.number
+              if (epNumber) awardVisited(epNumber)
+            }
           }}
         />
       </Canvas>
 
       <LoadingScreen ready={ready} />
       <Overlay activeIndex={activeIndex} isHub={isHub} hintVisible={hintVisible} isDesktop={isDesktop} />
+      <ProgressBar progress={progress} />
 
-      <DetailPanel episode={selectedEpisode} isMoving={isMoving} onClose={() => setSelectedIndex(null)} />
+      <DetailPanel
+        episode={selectedEpisode}
+        isMoving={isMoving}
+        onClose={() => setSelectedIndex(null)}
+        onWatch={(epNumber) => awardWatched(epNumber)}
+        onSubmit={(epNumber, submission) => awardSubmitted(epNumber, submission)}
+        progress={progress}
+      />
     </div>
   )
 }
