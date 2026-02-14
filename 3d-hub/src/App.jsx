@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import {
   OrbitControls,
   Html,
@@ -297,10 +297,8 @@ function EpisodeObject({
 
   useFrame((state, delta) => {
     if (!ref.current) return
-    // soft bob + idle rotation
-    ref.current.position.y = Math.sin(state.clock.elapsedTime * 0.8 + position[0]) * 0.12
-    ref.current.rotation.y += delta * 0.35
 
+    // Battery saver: no idle bob/rotation; only smooth scale on active changes.
     const s = 1 + 0.18 * activeWeight
     ref.current.scale.setScalar(damp(ref.current.scale.x, s, 14, delta))
   })
@@ -872,6 +870,9 @@ function App() {
       const speed = 0.00065
       targetRef.current = clamp(targetRef.current + e.deltaY * speed, 0, 1)
 
+      // demand-render: trigger a frame
+      window.__n9_invalidate?.()
+
       clearTimeout(scrollEndTimer)
       scrollEndTimer = setTimeout(snapToNearest, 220)
     }
@@ -893,11 +894,16 @@ function App() {
       const speed = 0.0012
       targetRef.current = clamp(targetRef.current + dy * speed, 0, 1)
 
+      // demand-render: trigger a frame
+      window.__n9_invalidate?.()
+
       clearTimeout(scrollEndTimer)
       scrollEndTimer = setTimeout(snapToNearest, 250)
     }
     const onTouchEnd = () => {
       touchStartY = null
+      // demand-render: trigger a frame
+      window.__n9_invalidate?.()
       clearTimeout(scrollEndTimer)
       scrollEndTimer = setTimeout(snapToNearest, 120)
     }
@@ -979,9 +985,14 @@ function App() {
           background: 'radial-gradient(circle at top, #141b32 0%, #05060a 52%, #020308 100%)',
         }}
         // iOS Safari optimization: cap DPR and disable AA (saves GPU + battery)
-        dpr={[1, 1.25]}
-        gl={{ antialias: false, powerPreference: 'high-performance' }}
-        onCreated={() => setReady(true)}
+        dpr={[1, 1.15]}
+        gl={{ antialias: false, powerPreference: 'high-performance', alpha: false, stencil: false }}
+        frameloop="demand"
+        onCreated={({ invalidate }) => {
+          setReady(true)
+          // expose invalidate for scroll/touch handlers
+          window.__n9_invalidate = invalidate
+        }}
       >
         <JourneyTicker tRef={tRef} targetRef={targetRef} onMotion={(moving) => setIsMoving(moving)} />
 
@@ -1033,8 +1044,12 @@ function App() {
 }
 
 function JourneyTicker({ tRef, targetRef }) {
+  const { invalidate } = useThree()
   useFrame((_, delta) => {
-    tRef.current = damp(tRef.current, targetRef.current, 10, delta)
+    const next = damp(tRef.current, targetRef.current, 10, delta)
+    const changed = Math.abs(next - tRef.current) > 1e-5
+    tRef.current = next
+    if (changed) invalidate()
   })
   return null
 }
