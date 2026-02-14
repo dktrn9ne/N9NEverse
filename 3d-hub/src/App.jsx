@@ -188,15 +188,21 @@ function LogoGLB() {
   const { scene } = useGLTF('/9-logo.glb')
   const ref = useRef()
 
+  // Your GLB appears to import laying "flat". We apply a fixed orientation offset
+  // so it sits upright like a pendant, then we billboard around Y to face the user.
+  const BASE_X = -Math.PI / 2
+  const BASE_Y = 0
+  const BASE_Z = 0
+
   useFrame(({ camera }) => {
     if (!ref.current) return
 
-    // Keep the logo upright (no tilt) and always facing the user.
-    // We only rotate around Y so it stays vertically upright.
+    // Face the camera, but only by rotating around Y (keeps it upright).
     const dx = camera.position.x - ref.current.position.x
     const dz = camera.position.z - ref.current.position.z
     const targetY = Math.atan2(dx, dz)
-    ref.current.rotation.set(0, targetY, 0)
+
+    ref.current.rotation.set(BASE_X, targetY + BASE_Y, BASE_Z)
   })
 
   // Make it pop a bit regardless of lighting
