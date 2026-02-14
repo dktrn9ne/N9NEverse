@@ -199,13 +199,13 @@ const geometries = [
   // EP03
   (props) => (
     <mesh {...props}>
-      <Cylinder args={[0.08, 0.08, 0.24, 24]} />
+      <Cylinder args={[0.08, 0.08, 0.24, 12]} />
     </mesh>
   ),
   // EP04
   (props) => (
     <mesh {...props}>
-      <Sphere args={[0.12, 32, 32]} />
+      <Sphere args={[0.12, 16, 16]} />
     </mesh>
   ),
   // EP05
@@ -217,19 +217,19 @@ const geometries = [
   // EP06
   (props) => (
     <mesh {...props}>
-      <Torus args={[0.12, 0.04, 16, 48]} />
+      <Torus args={[0.12, 0.04, 12, 24]} />
     </mesh>
   ),
   // EP07
   (props) => (
     <mesh {...props}>
-      <Cone args={[0.12, 0.24, 24]} />
+      <Cone args={[0.12, 0.24, 12]} />
     </mesh>
   ),
   // EP08
   (props) => (
     <mesh {...props}>
-      <Torus args={[0.11, 0.035, 16, 6]} />
+      <Torus args={[0.11, 0.035, 10, 6]} />
     </mesh>
   ),
 ]
@@ -578,7 +578,9 @@ export default function App() {
           height: '100vh',
           background: 'radial-gradient(circle at top, #141b32 0%, #05060a 52%, #020308 100%)',
         }}
-        dpr={[1, 1.5]}
+        // iOS Safari optimization: cap DPR and disable AA (saves GPU + battery)
+        dpr={[1, 1.25]}
+        gl={{ antialias: false, powerPreference: 'high-performance' }}
       >
         <JourneyTicker
           tRef={tRef}
