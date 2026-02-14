@@ -220,11 +220,49 @@ function LogoGLB() {
       // (BasicMaterial ignores lights; avoids iOS-specific PBR/precision weirdness.)
       const hasUV = Boolean(obj.geometry?.attributes?.uv)
       const nextMat = new THREE.MeshBasicMaterial({
-        color: hasUV ? 0xffffff : 0xffb6d5,
+        color: 0xffffff,
         map: hasUV ? texture : null,
         side: THREE.DoubleSide,
       })
       nextMat.toneMapped = false
+
+      if (!hasUV) {
+        // iOS-safe triplanar projection (no UVs required)
+        nextMat.map = null
+
+        nextMat.onBeforeCompile = (shader) => {
+          shader.uniforms.uTex = { value: texture }
+          shader.uniforms.uScale = { value: 1.6 }
+
+          // Vertex: pass world position + world normal to fragment
+          shader.vertexShader = shader.vertexShader
+            .replace(
+              '#include <common>',
+              `#include <common>\n\nvarying vec3 vWPos;\nvarying vec3 vWNorm;`,
+            )
+            .replace(
+              '#include <worldpos_vertex>',
+              `#include <worldpos_vertex>\n\nvWPos = worldPosition.xyz;`,
+            )
+            .replace(
+              '#include <defaultnormal_vertex>',
+              `#include <defaultnormal_vertex>\n\nvWNorm = normalize(mat3(modelMatrix) * normal);`,
+            )
+
+          // Fragment: sample texture from 3 axes and blend by normal
+          shader.fragmentShader = shader.fragmentShader
+            .replace(
+              '#include <common>',
+              `#include <common>\n\nuniform sampler2D uTex;\nuniform float uScale;\nvarying vec3 vWPos;\nvarying vec3 vWNorm;\n\nvec4 triSample(vec3 p, vec3 n) {\n  vec3 an = abs(n) + 1e-5;\n  an /= (an.x + an.y + an.z);\n  vec2 uvx = p.zy * uScale;\n  vec2 uvy = p.xz * uScale;\n  vec2 uvz = p.xy * uScale;\n  vec4 tx = texture2D(uTex, uvx);\n  vec4 ty = texture2D(uTex, uvy);\n  vec4 tz = texture2D(uTex, uvz);\n  return tx * an.x + ty * an.y + tz * an.z;\n}`,
+            )
+            .replace(
+              '#include <map_fragment>',
+              `vec4 texelColor = triSample(vWPos, normalize(vWNorm));\n\ndiffuseColor *= texelColor;`,
+            )
+        }
+
+        nextMat.customProgramCacheKey = () => 'triplanar-v2'
+      }
 
       obj.material = nextMat
       obj.frustumCulled = false
