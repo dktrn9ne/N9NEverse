@@ -337,6 +337,7 @@ function EpisodeObject({
   activeWeight,
   onSelect,
   showTooltip,
+  map,
 }) {
   const ref = useRef()
 
@@ -367,12 +368,13 @@ function EpisodeObject({
     >
       {geometry}
       <meshStandardMaterial
-        color={baseColor}
+        map={map || null}
+        color={map ? '#ffffff' : baseColor}
         emissive={emissive}
         emissiveIntensity={emissiveIntensity}
         toneMapped={false}
-        roughness={episode.cameo ? 0.25 : 0.4}
-        metalness={episode.cameo ? 0.2 : 0.05}
+        roughness={map ? 0.55 : episode.cameo ? 0.25 : 0.4}
+        metalness={map ? 0.05 : episode.cameo ? 0.2 : 0.05}
       />
       {showTooltip && (
         <Html distanceFactor={6}>
@@ -386,6 +388,13 @@ function EpisodeObject({
 function JourneyScene({ tRef, onActiveEpisodeChange }) {
   const controlsRef = useRef()
   const manualOverrideUntilRef = useRef(0)
+
+  const passportTex = useTexture('/passport-cover.jpg')
+  useMemo(() => {
+    passportTex.wrapS = passportTex.wrapT = THREE.ClampToEdgeWrapping
+    passportTex.colorSpace = THREE.SRGBColorSpace
+    passportTex.needsUpdate = true
+  }, [passportTex])
 
   const stopConfig = useMemo(() => {
     const EP_COUNT = episodes.length
@@ -506,6 +515,7 @@ function JourneyScene({ tRef, onActiveEpisodeChange }) {
             position={[pos.x, pos.y, pos.z]}
             isActive={isActive}
             activeWeight={activeWeight}
+            map={i === 0 ? passportTex : null}
             onSelect={() => {
               // jump/snap to this stop
               tRef.target = stops[i + 1]
