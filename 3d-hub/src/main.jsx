@@ -54,7 +54,15 @@ class ErrorBoundary extends React.Component {
                 wordBreak: 'break-word',
               }}
             >
-              {String(this.state.error?.stack || this.state.error)}
+              {JSON.stringify(
+                {
+                  name: this.state.error?.name,
+                  message: this.state.error?.message,
+                  stack: this.state.error?.stack,
+                },
+                null,
+                2,
+              )}
             </pre>
           </div>
         </div>
