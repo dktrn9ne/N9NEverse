@@ -834,6 +834,11 @@ function App() {
   const [isDesktop, setIsDesktop] = useState(false)
   const [ready, setReady] = useState(false)
 
+  const isIOS = useMemo(() => {
+    if (typeof navigator === 'undefined') return false
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
+  }, [])
+
   const [progress, setProgress] = useState(() => computeTotals(loadProgress() || defaultProgress()))
 
   const persist = (next) => {
@@ -932,8 +937,9 @@ function App() {
     return () => mql?.removeEventListener?.('change', update)
   }, [])
 
-  // Demand-render safety: nudge a few frames on initial load (iOS Safari sometimes needs it)
+  // Demand-render safety: nudge a few frames on initial load (non-iOS)
   useEffect(() => {
+    if (isIOS) return
     let raf = 0
     let i = 0
     const tick = () => {
@@ -943,7 +949,7 @@ function App() {
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [])
+  }, [isIOS])
 
   const awardVisited = (epNumber) => {
     persist({
@@ -997,24 +1003,24 @@ function App() {
           height: '100vh',
           background: 'radial-gradient(circle at top, #141b32 0%, #05060a 52%, #020308 100%)',
         }}
-        // iOS Safari optimization: cap DPR and disable AA (saves GPU + battery)
-        dpr={[1, 1.15]}
+        // iOS Safari optimization: keep DPR low + disable AA (saves GPU + battery)
+        dpr={isIOS ? [1, 1.15] : [1, 1.25]}
         gl={{ antialias: false, powerPreference: 'high-performance', alpha: false, stencil: false }}
-        frameloop="demand"
+        // iOS Safari sometimes shows a black canvas on initial load with demand rendering.
+        frameloop={isIOS ? 'always' : 'demand'}
         onCreated={({ gl, invalidate }) => {
           setReady(true)
-          // Ensure non-black clear on iOS + force an initial frame
           try {
             gl.setClearColor('#020308', 1)
           } catch {
             // ignore
           }
 
-          // expose invalidate for scroll/touch handlers
-          window.__n9_invalidate = invalidate
-
-          // force first paint (frameloop=demand can otherwise look blank on some browsers)
-          invalidate()
+          if (!isIOS) {
+            // expose invalidate for scroll/touch handlers
+            window.__n9_invalidate = invalidate
+            invalidate()
+          }
         }}
       >
         <JourneyTicker tRef={tRef} targetRef={targetRef} onMotion={(moving) => setIsMoving(moving)} />
