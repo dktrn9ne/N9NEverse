@@ -208,7 +208,7 @@ function LogoGLB() {
   useEffect(() => {
     // Basic texture setup
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping
-    texture.repeat.set(1, 1)
+    texture.repeat.set(2, 2)
     texture.anisotropy = 4
     texture.colorSpace = THREE.SRGBColorSpace
     texture.needsUpdate = true
@@ -220,17 +220,41 @@ function LogoGLB() {
       if (obj.material) {
         const applyToMaterial = (mat) => {
           if (!mat) return
+
           mat.toneMapped = false
-          mat.map = texture
-          mat.metalness = 0.35
-          mat.roughness = 0.28
+          mat.color = new THREE.Color('#ffffff')
+          mat.metalness = 0.55
+          mat.roughness = 0.18
           mat.side = THREE.DoubleSide
+          mat.vertexColors = false
 
           // turn off emissive glow for a more "pendant" look
           if ('emissive' in mat) {
             mat.emissive = new THREE.Color('#000000')
             mat.emissiveIntensity = 0
           }
+
+          const hasUV = Boolean(obj.geometry?.attributes?.uv)
+          if (hasUV) {
+            mat.map = texture
+          } else {
+            // Fallback when the GLB has no UVs: tri-planar projection (wraps texture without UV unwrap)
+            mat.onBeforeCompile = (shader) => {
+              shader.uniforms.uTex = { value: texture }
+              shader.uniforms.uScale = { value: 1.8 }
+
+              shader.fragmentShader = shader.fragmentShader
+                .replace(
+                  '#include <common>',
+                  `#include <common>\n\nuniform sampler2D uTex;\nuniform float uScale;\n\nvec4 triplanarSample(vec3 pos, vec3 n) {\n  vec3 an = abs(n) + 0.00001;\n  an /= (an.x + an.y + an.z);\n  vec2 uvx = pos.zy * uScale;\n  vec2 uvy = pos.xz * uScale;\n  vec2 uvz = pos.xy * uScale;\n  vec4 tx = texture2D(uTex, uvx);\n  vec4 ty = texture2D(uTex, uvy);\n  vec4 tz = texture2D(uTex, uvz);\n  return tx * an.x + ty * an.y + tz * an.z;\n}`,
+                )
+                .replace(
+                  '#include <map_fragment>',
+                  `#ifdef USE_MAP\n  // ignored\n#else\n  vec4 texelColor = triplanarSample(vViewPosition, normalize(normal));\n  diffuseColor *= texelColor;\n#endif`,
+                )
+            }
+          }
+
           mat.needsUpdate = true
         }
 
