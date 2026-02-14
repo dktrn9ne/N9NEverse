@@ -285,12 +285,22 @@ const geometries = [
       <Box args={[0.22, 0.14, 0.02]} />
     </mesh>
   ),
-  // EP02
+
+  // EP02 — clean stack of silver bullion bars
   (props) => (
-    <mesh {...props}>
-      <Box args={[0.2, 0.2, 0.2]} />
-    </mesh>
+    <group {...props}>
+      <mesh position={[0, 0.03, 0]} rotation={[0.08, 0.18, 0.02]}>
+        <Box args={[0.26, 0.08, 0.14]} />
+      </mesh>
+      <mesh position={[0.01, -0.02, 0.01]} rotation={[0.02, -0.12, -0.01]}>
+        <Box args={[0.26, 0.08, 0.14]} />
+      </mesh>
+      <mesh position={[-0.015, -0.07, -0.01]} rotation={[-0.03, 0.09, 0.01]}>
+        <Box args={[0.26, 0.08, 0.14]} />
+      </mesh>
+    </group>
   ),
+
   // EP03
   (props) => (
     <mesh {...props}>
@@ -353,10 +363,10 @@ function EpisodeObject({
     ref.current.scale.setScalar(damp(ref.current.scale.x, s, 14, delta))
   })
 
-  const baseColor = episode.cameo ? '#ffb84d' : '#e8f7ff'
-  const emissive = episode.cameo ? '#ffb84d' : '#7be7ff'
+  const baseColor = episode.cameo ? '#d9dde3' : '#e8f7ff'
+  const emissive = episode.cameo ? '#cfd6df' : '#7be7ff'
   const emissiveIntensity = episode.cameo
-    ? 1.2 + 1.8 * activeWeight
+    ? 0.55 + 0.9 * activeWeight
     : 0.6 + 1.4 * activeWeight
 
   const isPassport = episode.number === 'EP01'
@@ -381,8 +391,8 @@ function EpisodeObject({
           emissive={emissive}
           emissiveIntensity={emissiveIntensity}
           toneMapped={false}
-          roughness={map ? 0.55 : episode.cameo ? 0.25 : 0.4}
-          metalness={map ? 0.05 : episode.cameo ? 0.2 : 0.05}
+          roughness={map ? 0.55 : episode.cameo ? 0.12 : 0.4}
+          metalness={map ? 0.05 : episode.cameo ? 0.9 : 0.05}
         />
       )}
 
