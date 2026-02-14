@@ -1,0 +1,110 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #f0f8ff;
+}
+
+.tooltip {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  transform: translate(-50%, -150%);
+  pointer-events: none;
+}
+
+.detail-panel {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 16px 20px;
+  background: rgba(8, 12, 26, 0.9);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.detail-panel h2 {
+  font-size: 1.1rem;
+  margin: 4px 0 8px;
+}
+
+.detail-panel p {
+  font-size: 0.9rem;
+  color: rgba(214, 242, 255, 0.9);
+  margin: 0 0 10px;
+}
+
+.links a {
+  display: inline-block;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  text-decoration: none;
+  color: #00e5ff;
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 99px;
+}
+
+.xp-hook {
+  font-size: 0.85rem;
+  margin-top: 8px;
+  color: rgba(214, 242, 255, 0.9);
+}
+
+.close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  line-height: 24px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.ep-tag {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 184, 77, 0.7);
+    background: rgba(255, 184, 77, 0.15);
+    color: #ffb84d;
+    display: inline-block;
+}
+
+.ep-tag:not(:empty) {
+    margin-bottom: 6px;
+}
