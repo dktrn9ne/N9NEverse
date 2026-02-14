@@ -9,6 +9,7 @@ body {
   overflow: hidden;
   font-family: system-ui, -apple-system, sans-serif;
   color: #f0f8ff;
+  background: #020308;
 }
 
 .tooltip {
