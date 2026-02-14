@@ -190,8 +190,10 @@ function LogoGLB() {
 
   // Keep the 9 locked in the same *screen position* at all times (HUD-style),
   // matching the reference framing. This attaches the logo to the camera.
-  const CAM_OFFSET = useMemo(() => new THREE.Vector3(0, -0.25, -2.7), [])
-  const LOGO_EULER = useMemo(() => new THREE.Euler(-0.06, Math.PI, 0.02), [])
+  const CAM_OFFSET = useMemo(() => new THREE.Vector3(0, -0.18, -2.85), [])
+  // GLB imports laying flat, so we include a -90° X rotation to stand it upright,
+  // then add a small tilt to match the reference framing.
+  const LOGO_EULER = useMemo(() => new THREE.Euler(-Math.PI / 2 - 0.06, 0, 0.02), [])
   const qOffset = useMemo(() => new THREE.Quaternion().setFromEuler(LOGO_EULER), [LOGO_EULER])
 
   useFrame(({ camera }) => {
