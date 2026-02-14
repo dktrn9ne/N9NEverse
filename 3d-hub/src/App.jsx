@@ -190,7 +190,7 @@ function LogoGLB() {
   // Your GLB appears to import laying "flat". We apply a fixed orientation offset
   // so it sits upright like a pendant, then we billboard around Y to face the user.
   const BASE_X = -Math.PI / 2
-  const BASE_Y = Math.PI
+  const BASE_Y = 0
   const BASE_Z = 0
 
   useFrame(({ camera }) => {
