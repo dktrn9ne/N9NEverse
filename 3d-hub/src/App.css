@@ -4,6 +4,103 @@
   overflow: hidden;
 }
 
+.app--desktop {
+  background: #020308;
+}
+
+.loading {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at top, #141b32 0%, #05060a 52%, #020308 100%);
+  transition: opacity 420ms ease;
+  pointer-events: auto;
+}
+
+.loading--hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading__inner {
+  width: min(520px, calc(100vw - 40px));
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+}
+
+.loading__kicker {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.loading__title {
+  margin-top: 10px;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+}
+
+.loading__bar {
+  margin-top: 16px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  overflow: hidden;
+}
+
+.loading__barFill {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(123,231,255,0.2), rgba(123,231,255,0.95));
+  width: 0%;
+}
+
+.loading__pct {
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+.chrome {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(6, 8, 16, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(14px);
+  pointer-events: none;
+  color: rgba(255, 255, 255, 0.86);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  font-size: 12px;
+}
+
+.chrome__left {
+  opacity: 0.75;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.chrome__center {
+  opacity: 0.95;
+  letter-spacing: 0.02em;
+}
+
+.chrome__right {
+  justify-self: end;
+  opacity: 0.5;
+}
+
 .tooltip {
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
     Arial;

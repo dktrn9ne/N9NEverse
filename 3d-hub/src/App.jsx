@@ -5,6 +5,7 @@ import {
   Html,
   useTexture,
   useGLTF,
+  useProgress,
   Box,
   Torus,
   Cone,
@@ -735,21 +736,55 @@ function DetailPanel({ episode, isMoving, onClose }) {
   )
 }
 
-function Overlay({ activeIndex, isHub, hintVisible }) {
+function LoadingScreen({ ready }) {
+  const { progress, active } = useProgress()
+  const pct = Math.min(100, Math.max(0, Math.round(progress)))
+  const show = !ready || active || pct < 100
+
+  return (
+    <div className={'loading' + (show ? '' : ' loading--hide')}>
+      <div className="loading__inner">
+        <div className="loading__kicker">N9NEVERSE</div>
+        <div className="loading__title">Loading 3D Hub…</div>
+        <div className="loading__bar" aria-hidden>
+          <div className="loading__barFill" style={{ width: pct + '%' }} />
+        </div>
+        <div className="loading__pct">{pct}%</div>
+      </div>
+    </div>
+  )
+}
+
+function DesktopChrome({ activeIndex, isHub }) {
+  const ep = activeIndex >= 0 ? episodes[activeIndex] : null
+  return (
+    <div className="chrome">
+      <div className="chrome__left">N9NEVERSE</div>
+      <div className="chrome__center">{isHub ? '3D Hub' : `${ep?.number} — ${ep?.short}`}</div>
+      <div className="chrome__right">Scroll</div>
+    </div>
+  )
+}
+
+function Overlay({ activeIndex, isHub, hintVisible, isDesktop }) {
   const ep = activeIndex >= 0 ? episodes[activeIndex] : null
 
   return (
     <div className="overlay">
-      <div className="overlay__header">
-        <div className="overlay__kicker">N9NEVERSE</div>
-        {isHub ? (
-          <div className="overlay__title">3D Hub</div>
-        ) : (
-          <div className="overlay__title">
-            {ep?.number}/08 — {ep?.short}
-          </div>
-        )}
-      </div>
+      {isDesktop ? (
+        <DesktopChrome activeIndex={activeIndex} isHub={isHub} />
+      ) : (
+        <div className="overlay__header">
+          <div className="overlay__kicker">N9NEVERSE</div>
+          {isHub ? (
+            <div className="overlay__title">3D Hub</div>
+          ) : (
+            <div className="overlay__title">
+              {ep?.number}/08 — {ep?.short}
+            </div>
+          )}
+        </div>
+      )}
 
       {hintVisible && (
         <div className="overlay__hint">
@@ -772,6 +807,8 @@ export default function App() {
   const [selectedIndex, setSelectedIndex] = useState(null)
   const [isMoving, setIsMoving] = useState(false)
   const [hintVisible, setHintVisible] = useState(true)
+  const [isDesktop, setIsDesktop] = useState(false)
+  const [ready, setReady] = useState(false)
 
   const stops = useMemo(() => {
     const EP_COUNT = episodes.length
@@ -843,8 +880,16 @@ export default function App() {
   const selectedEpisode = selectedIndex != null ? episodes[selectedIndex] : null
   const isHub = activeIndex < 0
 
+  useEffect(() => {
+    const mql = window.matchMedia?.('(min-width: 1024px)')
+    const update = () => setIsDesktop(Boolean(mql?.matches))
+    update()
+    mql?.addEventListener?.('change', update)
+    return () => mql?.removeEventListener?.('change', update)
+  }, [])
+
   return (
-    <div className="app">
+    <div className={"app" + (isDesktop ? ' app--desktop' : '')}>
       <Canvas
         camera={{ position: [0, 1.2, 6.5], fov: 65 }}
         style={{
@@ -855,12 +900,9 @@ export default function App() {
         // iOS Safari optimization: cap DPR and disable AA (saves GPU + battery)
         dpr={[1, 1.25]}
         gl={{ antialias: false, powerPreference: 'high-performance' }}
+        onCreated={() => setReady(true)}
       >
-        <JourneyTicker
-          tRef={tRef}
-          targetRef={targetRef}
-          onMotion={(moving) => setIsMoving(moving)}
-        />
+        <JourneyTicker tRef={tRef} targetRef={targetRef} onMotion={(moving) => setIsMoving(moving)} />
 
         <JourneyScene
           tRef={{
@@ -889,13 +931,10 @@ export default function App() {
         />
       </Canvas>
 
-      <Overlay activeIndex={activeIndex} isHub={isHub} hintVisible={hintVisible} />
+      <LoadingScreen ready={ready} />
+      <Overlay activeIndex={activeIndex} isHub={isHub} hintVisible={hintVisible} isDesktop={isDesktop} />
 
-      <DetailPanel
-        episode={selectedEpisode}
-        isMoving={isMoving}
-        onClose={() => setSelectedIndex(null)}
-      />
+      <DetailPanel episode={selectedEpisode} isMoving={isMoving} onClose={() => setSelectedIndex(null)} />
     </div>
   )
 }
