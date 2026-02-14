@@ -182,10 +182,14 @@ function LogoPlane({ billboard = true }) {
   )
 }
 
-function LogoGLB() {
+function LogoGLB({ onLoaded }) {
   const { scene } = useGLTF('/9-logo.glb')
   const texture = useTexture('/pendant-texture.jpg')
   const ref = useRef()
+
+  useEffect(() => {
+    onLoaded?.()
+  }, [onLoaded])
 
   // Your GLB appears to import laying "flat". We apply a fixed orientation offset
   // so it sits upright like a pendant, then we billboard around Y to face the user.
@@ -443,10 +447,8 @@ function JourneyScene({ tRef, onActiveEpisodeChange }) {
       <ambientLight intensity={0.55} />
       <pointLight position={[0, 0, 5]} intensity={55} color={'#7be7ff'} />
 
-      {/* Always render a simple center marker so we can never be "invisible" */}
-      <LogoPlane billboard />
-      <Suspense fallback={null}>
-        <LogoGLB />
+      <Suspense fallback={<LogoPlane billboard />}>
+        <LogoGLB onLoaded={() => setLogoReady(true)} />
       </Suspense>
 
       {episodes.map((ep, i) => {
@@ -557,6 +559,7 @@ export default function App() {
   const [selectedIndex, setSelectedIndex] = useState(null)
   const [isMoving, setIsMoving] = useState(false)
   const [hintVisible, setHintVisible] = useState(true)
+  const [logoReady, setLogoReady] = useState(false)
 
   const stops = useMemo(() => {
     const EP_COUNT = episodes.length
