@@ -187,23 +187,21 @@ function LogoGLB() {
   const { scene } = useGLTF('/9-logo.glb')
   const ref = useRef()
 
-  // Keep the 9 locked in the same *screen position* at all times (HUD-style),
-  // but render the GLB with its ORIGINAL materials (no texture overrides).
-  const CAM_OFFSET = useMemo(() => new THREE.Vector3(0, -0.18, -2.85), [])
-  const LOGO_EULER = useMemo(
-    () => new THREE.Euler(-Math.PI / 2 - 0.06, Math.PI, 0.02),
-    [],
-  )
-  const qOffset = useMemo(() => new THREE.Quaternion().setFromEuler(LOGO_EULER), [LOGO_EULER])
+  // Back to center of the system (world space), like the original hub concept.
+  // Keep it upright and facing the camera (Y-only) so it reads from any orbit.
+  const BASE_X = -Math.PI / 2
+  const BASE_Y = Math.PI
+  const BASE_Z = 0.02
 
   useFrame(({ camera }) => {
     if (!ref.current) return
 
-    const off = CAM_OFFSET.clone().applyQuaternion(camera.quaternion)
-    ref.current.position.copy(camera.position).add(off)
+    // Face the camera, but only rotate around Y (upright)
+    const dx = camera.position.x - ref.current.position.x
+    const dz = camera.position.z - ref.current.position.z
+    const targetY = Math.atan2(dx, dz)
 
-    ref.current.quaternion.copy(camera.quaternion)
-    ref.current.quaternion.multiply(qOffset)
+    ref.current.rotation.set(BASE_X, targetY + BASE_Y, BASE_Z)
   })
 
   useEffect(() => {
@@ -213,13 +211,13 @@ function LogoGLB() {
       obj.castShadow = false
       obj.receiveShadow = false
 
-      // Keep it on top (avoid z-fighting / occlusion)
+      // Restore normal depth behavior (so it belongs to the 3D world)
       if (obj.material) {
         const apply = (m) => {
           if (!m) return
           m.toneMapped = false
-          m.depthTest = false
-          m.depthWrite = false
+          m.depthTest = true
+          m.depthWrite = true
           m.needsUpdate = true
         }
         if (Array.isArray(obj.material)) obj.material.forEach(apply)
@@ -228,7 +226,7 @@ function LogoGLB() {
     })
   }, [scene])
 
-  return <primitive ref={ref} object={scene} scale={1.05} renderOrder={10} />
+  return <primitive ref={ref} object={scene} position={[0, 0, 0]} scale={1.05} />
 }
 
 useGLTF.preload('/9-logo.glb')
