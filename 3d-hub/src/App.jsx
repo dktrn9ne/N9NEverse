@@ -185,118 +185,50 @@ function LogoPlane({ billboard = true }) {
 
 function LogoGLB() {
   const { scene } = useGLTF('/9-logo.glb')
-  const texture = useTexture('/pendant-texture.jpg')
   const ref = useRef()
 
   // Keep the 9 locked in the same *screen position* at all times (HUD-style),
-  // matching the reference framing. This attaches the logo to the camera.
+  // but render the GLB with its ORIGINAL materials (no texture overrides).
   const CAM_OFFSET = useMemo(() => new THREE.Vector3(0, -0.18, -2.85), [])
-  // GLB imports laying flat, so we include a -90° X rotation to stand it upright,
-  // then add a small tilt to match the reference framing.
-  const LOGO_EULER = useMemo(() => new THREE.Euler(-Math.PI / 2 - 0.06, 0, 0.02), [])
+  const LOGO_EULER = useMemo(
+    () => new THREE.Euler(-Math.PI / 2 - 0.06, Math.PI, 0.02),
+    [],
+  )
   const qOffset = useMemo(() => new THREE.Quaternion().setFromEuler(LOGO_EULER), [LOGO_EULER])
 
   useFrame(({ camera }) => {
     if (!ref.current) return
 
-    // Position a fixed distance in front of the camera, with a slight downward offset
     const off = CAM_OFFSET.clone().applyQuaternion(camera.quaternion)
     ref.current.position.copy(camera.position).add(off)
 
-    // Match camera orientation, then apply the logo tilt/flip
     ref.current.quaternion.copy(camera.quaternion)
     ref.current.quaternion.multiply(qOffset)
   })
 
-  // Make it pop a bit regardless of lighting
   useEffect(() => {
-    // Basic texture setup
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping
-    texture.repeat.set(2, 2)
-    texture.anisotropy = 4
-    texture.colorSpace = THREE.SRGBColorSpace
-    texture.needsUpdate = true
-
     scene.traverse((obj) => {
       if (!obj.isMesh) return
-
-      // Replace materials with MeshBasicMaterial for maximum cross-device reliability.
-      // (BasicMaterial ignores lights; avoids iOS-specific PBR/precision weirdness.)
-      const hasUV = Boolean(obj.geometry?.attributes?.uv)
-      const nextMat = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        map: hasUV ? texture : null,
-        side: THREE.DoubleSide,
-      })
-      nextMat.toneMapped = false
-
-      if (!hasUV) {
-        // Generate simple planar UVs on the CPU (stable on iOS; no shader hacks).
-        // We project onto the dominant plane based on bounding box extents.
-        const geom = obj.geometry
-        geom.computeBoundingBox()
-        const bb = geom.boundingBox
-        const size = new THREE.Vector3()
-        bb.getSize(size)
-
-        const pos = geom.attributes.position
-        const uvs = new Float32Array(pos.count * 2)
-
-        // Choose projection plane
-        // If Y is thin (likely a flat pendant), use XZ. Otherwise use XY.
-        const useXZ = size.y < Math.min(size.x, size.z)
-
-        for (let i = 0; i < pos.count; i++) {
-          const x = pos.getX(i)
-          const y = pos.getY(i)
-          const z = pos.getZ(i)
-
-          let u, v
-          if (useXZ) {
-            u = (x - bb.min.x) / (size.x || 1)
-            v = (z - bb.min.z) / (size.z || 1)
-          } else {
-            u = (x - bb.min.x) / (size.x || 1)
-            v = (y - bb.min.y) / (size.y || 1)
-          }
-
-          uvs[i * 2] = u
-          uvs[i * 2 + 1] = v
-        }
-
-        geom.setAttribute('uv', new THREE.BufferAttribute(uvs, 2))
-        geom.attributes.uv.needsUpdate = true
-
-        nextMat.map = texture
-      }
-
-      obj.material = nextMat
       obj.frustumCulled = false
       obj.castShadow = false
       obj.receiveShadow = false
 
-      // Try to ensure the logo is always visible
-      if (Array.isArray(obj.material)) {
-        obj.material.forEach((m) => {
+      // Keep it on top (avoid z-fighting / occlusion)
+      if (obj.material) {
+        const apply = (m) => {
+          if (!m) return
+          m.toneMapped = false
           m.depthTest = false
           m.depthWrite = false
-        })
-      } else {
-        obj.material.depthTest = false
-        obj.material.depthWrite = false
+          m.needsUpdate = true
+        }
+        if (Array.isArray(obj.material)) obj.material.forEach(apply)
+        else apply(obj.material)
       }
     })
-  }, [scene, texture])
+  }, [scene])
 
-  return (
-    <primitive
-      ref={ref}
-      object={scene}
-      scale={1.05}
-      // render on top so it doesn't get occluded by episode objects
-      renderOrder={10}
-    />
-  )
+  return <primitive ref={ref} object={scene} scale={1.05} renderOrder={10} />
 }
 
 useGLTF.preload('/9-logo.glb')
