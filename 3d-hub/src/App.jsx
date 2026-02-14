@@ -214,7 +214,7 @@ function LogoGLB() {
     })
   }, [scene])
 
-  return <primitive ref={ref} object={scene} position={[0, 0, 0]} scale={1.6} />
+  return <primitive ref={ref} object={scene} position={[0, 0, 0]} scale={1.05} />
 }
 
 useGLTF.preload('/9-logo.glb')
