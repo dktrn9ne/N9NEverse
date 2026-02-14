@@ -1,6 +1,7 @@
 import React, { useRef, useState, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Sphere, Html, useTexture, Box, Torus, Cone, Cylinder, Octahedron } from '@react-three/drei'
+import * as THREE from 'three'
 
 // Data for the episodes, same as the journey map
 const episodes = [
@@ -27,11 +28,20 @@ const geometries = [
 
 
 function LogoPlane() {
-    const texture = useTexture('/n9ne-logo.jpg')
+    const texture = useTexture('/n9ne-logo.jpg');
     return (
         <mesh>
             <planeGeometry args={[2, 2]} />
-            <meshStandardMaterial map={texture} emissive="white" emissiveMap={texture} emissiveIntensity={0.2} toneMapped={false} transparent />
+            <meshStandardMaterial 
+                map={texture} 
+                emissive="white" 
+                emissiveMap={texture} 
+                emissiveIntensity={0.3} 
+                toneMapped={false} 
+                transparent 
+                side={THREE.DoubleSide}
+                alphaTest={0.5}
+            />
         </mesh>
     )
 }
@@ -41,7 +51,6 @@ function Satellite({ episode, geometry, position, onClick }) {
   const [isHovered, setIsHovered] = useState(false);
 
   useFrame((state, delta) => {
-    // Optional: make satellites bob up and down
     meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5 + position[0]) * 0.2;
   });
 
@@ -74,8 +83,8 @@ function Scene({ onSelectEpisode }) {
 
   return (
     <>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[0, 0, 5]} intensity={50} color="#00e5ff" />
+      <ambientLight intensity={0.7} />
+      <pointLight position={[0, 1, 4]} intensity={2.5} color="#00e5ff" />
       <LogoPlane />
       <group ref={groupRef}>
         {episodes.map((ep, i) => {
@@ -86,7 +95,7 @@ function Scene({ onSelectEpisode }) {
           return <Satellite key={ep.number} episode={ep} geometry={geometries[i % geometries.length]} position={[x, 0, z]} onClick={onSelectEpisode} />;
         })}
       </group>
-      <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.3} minPolarAngle={Math.PI / 3} maxPolarAngle={Math.PI * 2 / 3} />
+      <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.3} minPolarAngle={Math.PI / 3.5} maxPolarAngle={Math.PI * 2.5 / 3.5} />
     </>
   );
 }
