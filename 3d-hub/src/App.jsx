@@ -714,10 +714,11 @@ function DetailPanel({ episode, isMoving, onClose, onWatch, onSubmit, progress }
   )
 }
 
-function LoadingScreen({ ready }) {
+function LoadingScreen({ ready, painted }) {
   const { progress, active } = useProgress()
   const pct = Math.min(100, Math.max(0, Math.round(progress)))
-  const show = !ready || active || pct < 100
+  // Keep loader until we actually paint a frame (prevents "black screen" perception on iOS).
+  const show = !ready || !painted || active || pct < 100
 
   return (
     <div className={'loading' + (show ? '' : ' loading--hide')}>
@@ -833,6 +834,7 @@ function App() {
   const [hintVisible, setHintVisible] = useState(true)
   const [isDesktop, setIsDesktop] = useState(false)
   const [ready, setReady] = useState(false)
+  const [painted, setPainted] = useState(false)
 
   const isIOS = useMemo(() => {
     if (typeof navigator === 'undefined') return false
@@ -1016,14 +1018,16 @@ function App() {
             // ignore
           }
 
-          if (!isIOS) {
-            // expose invalidate for scroll/touch handlers
-            window.__n9_invalidate = invalidate
-            invalidate()
-          }
+          // expose invalidate for scroll/touch handlers
+          window.__n9_invalidate = invalidate
+
+          // force a couple initial frames
+          invalidate()
+          requestAnimationFrame(() => invalidate())
         }}
       >
         <JourneyTicker tRef={tRef} targetRef={targetRef} onMotion={(moving) => setIsMoving(moving)} />
+        <FirstPaint onPaint={() => setPainted(true)} />
 
         <JourneyScene
           tRef={{
@@ -1056,7 +1060,7 @@ function App() {
         />
       </Canvas>
 
-      <LoadingScreen ready={ready} />
+      <LoadingScreen ready={ready} painted={painted} />
       <Overlay activeIndex={activeIndex} isHub={isHub} hintVisible={hintVisible} isDesktop={isDesktop} />
       <ProgressBar progress={progress} />
 
@@ -1070,6 +1074,16 @@ function App() {
       />
     </div>
   )
+}
+
+function FirstPaint({ onPaint }) {
+  const once = useRef(false)
+  useFrame(() => {
+    if (once.current) return
+    once.current = true
+    onPaint?.()
+  })
+  return null
 }
 
 function JourneyTicker({ tRef, targetRef }) {
