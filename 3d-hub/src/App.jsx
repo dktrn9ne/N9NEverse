@@ -664,7 +664,19 @@ function DetailPanel({ episode, isMoving, onClose, onWatch, onSubmit, progress }
             href={link.href}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => onWatch?.(episode.number, idx)}
+            onClick={(e) => {
+              onWatch?.(episode.number, idx)
+
+              // Some in-app browsers (and iOS Safari in certain contexts) open target=_blank to a blank/black page.
+              // We attempt window.open; if it fails, we navigate in the same tab.
+              try {
+                e.preventDefault()
+                const w = window.open(link.href, '_blank', 'noopener,noreferrer')
+                if (!w) window.location.href = link.href
+              } catch {
+                window.location.href = link.href
+              }
+            }}
           >
             {link.label}
           </a>
