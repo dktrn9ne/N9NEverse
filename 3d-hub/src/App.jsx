@@ -793,7 +793,74 @@ function Overlay({ activeIndex, isHub, hintVisible, isDesktop }) {
 }
 
 // ---- App ----------------------------------------------------------------
-export default function loadProgress() {
+function LiteMode() {
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        padding: 18,
+        color: 'white',
+        background: '#020308',
+        fontFamily:
+          'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial',
+      }}
+    >
+      <div style={{ opacity: 0.7, letterSpacing: '0.22em', fontSize: 12, textTransform: 'uppercase' }}>
+        N9NEVERSE
+      </div>
+      <h1 style={{ margin: '10px 0 6px', fontSize: 18 }}>Lite Mode (no 3D)</h1>
+      <p style={{ margin: 0, opacity: 0.8, lineHeight: 1.45 }}>
+        Your browser couldn’t load the 3D scene. Here’s the journey with links.
+      </p>
+
+      <div style={{ marginTop: 14, display: 'grid', gap: 12 }}>
+        {episodes.map((ep) => (
+          <div
+            key={ep.number}
+            style={{
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: 14,
+              padding: 14,
+              background: 'rgba(0,0,0,0.25)',
+            }}
+          >
+            <div style={{ opacity: 0.7, fontSize: 12, letterSpacing: '0.12em' }}>
+              {ep.number} — {ep.short}
+            </div>
+            <div style={{ marginTop: 6, fontSize: 16 }}>{ep.title}</div>
+            <div style={{ marginTop: 6, opacity: 0.75, lineHeight: 1.4 }}>{ep.description}</div>
+            <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {ep.links.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: 12,
+                    border: '1px solid rgba(123,231,255,0.22)',
+                    background: 'rgba(123,231,255,0.12)',
+                    color: 'rgba(255,255,255,0.92)',
+                    textDecoration: 'none',
+                    fontSize: 13,
+                  }}
+                >
+                  {l.label}
+                </a>
+              ))}
+            </div>
+            <div style={{ marginTop: 10, opacity: 0.8, fontSize: 13 }}>
+              <b>XP Hook:</b> {ep.xpHook}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function loadProgress() {
   try {
     const raw = localStorage.getItem('n9neverse_progress_v1')
     if (!raw) return null
@@ -822,6 +889,16 @@ function computeTotals(p) {
 }
 
 function App() {
+  const isLite = useMemo(() => {
+    try {
+      return new URLSearchParams(window.location.search).get('lite') === '1'
+    } catch {
+      return false
+    }
+  }, [])
+
+  if (isLite) return <LiteMode />
+
   // progress state kept in refs for smoothness
   const tRef = useRef(0)
   const targetRef = useRef(0)
@@ -1101,3 +1178,5 @@ function JourneyTicker({ tRef, targetRef }) {
   })
   return null
 }
+
+export default App

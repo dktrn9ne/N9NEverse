@@ -40,6 +40,33 @@
       window.addEventListener('unhandledrejection', function (e) {
         showBootError('Unhandled promise rejection.', String(e.reason || e));
       });
+
+      // If WebGL never paints, offer a safe fallback mode.
+      setTimeout(function(){
+        var boot = document.getElementById('boot');
+        if (!boot) return;
+        if (boot.style.display === 'none') return;
+        var inner = boot.querySelector('div');
+        if (!inner) return;
+        var p = document.createElement('p');
+        p.style.margin = '14px 0 0';
+        p.style.opacity = '0.85';
+        p.style.fontSize = '13px';
+        p.textContent = 'Still loading? Tap “Lite Mode” to view the journey without 3D.';
+        var a = document.createElement('a');
+        a.href = '/?lite=1';
+        a.textContent = 'Lite Mode';
+        a.style.display = 'inline-flex';
+        a.style.marginTop = '10px';
+        a.style.padding = '10px 12px';
+        a.style.borderRadius = '999px';
+        a.style.border = '1px solid rgba(123,231,255,0.22)';
+        a.style.background = 'rgba(123,231,255,0.12)';
+        a.style.color = 'rgba(255,255,255,0.92)';
+        a.style.textDecoration = 'none';
+        inner.appendChild(p);
+        inner.appendChild(a);
+      }, 8000);
     </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
