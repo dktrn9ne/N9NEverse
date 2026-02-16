@@ -1081,6 +1081,11 @@ function FirstPaint({ onPaint }) {
   useFrame(() => {
     if (once.current) return
     once.current = true
+    try {
+      window.__hideBoot?.()
+    } catch {
+      // ignore
+    }
     onPaint?.()
   })
   return null

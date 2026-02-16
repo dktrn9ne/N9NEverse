@@ -73,9 +73,12 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Hide the non-React boot overlay once React actually mounts.
+// Keep the boot overlay visible until the app confirms it has painted at least one frame.
+// This prevents "all black screen" if WebGL fails or the app stalls early.
 const boot = document.getElementById('boot')
-if (boot) boot.style.display = 'none'
+window.__hideBoot = () => {
+  if (boot) boot.style.display = 'none'
+}
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
